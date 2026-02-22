@@ -1,1 +1,1 @@
-# claude_plugin_relay
+# claude-plugin-relay
