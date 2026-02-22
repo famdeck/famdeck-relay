@@ -2,7 +2,34 @@
 
 ## Routing Overview
 
-When a user creates an issue via relay, the routing engine determines which tracker receives it. This decision is based on the project's `issue_trackers` configuration from atlas.
+When a user creates an issue via relay, the routing engine determines which tracker receives it. The decision is based on the project's `.claude/relay.yaml` — a config file that lives in the project repo and defines which trackers the project uses.
+
+## Per-Project Config
+
+```yaml
+# <project-root>/.claude/relay.yaml
+
+issue_trackers:
+  - name: gitlab
+    type: gitlab                          # gitlab | github | jira | beads
+    project_id: "digital/web-sdk"         # Tracker-specific project reference
+    default: true                         # Primary tracker for this project
+    labels: [sdk, web]                    # Default labels on new issues
+    routing_rules:                        # Fine-grained routing (optional)
+      - match:
+          type: bug
+          priority: [critical, high]
+        action:
+          labels: [urgent]
+          assignee: "@team-lead"
+
+  - name: beads
+    type: beads
+    scope: local
+    routing_rules:
+      - match: { source: agent }
+        action: { default: true }
+```
 
 ## Routing Decision Tree
 
@@ -10,17 +37,19 @@ When a user creates an issue via relay, the routing engine determines which trac
 /relay:issue "Fix JWT refresh bug" [--project X] [--tracker Y] [--type bug]
   │
   ├─ 1. Resolve project
-  │     ├─ Explicit --project flag → use that
-  │     ├─ Atlas cwd detection → use current project
-  │     └─ No project found → ask user
+  │     ├─ Explicit --project flag → look up in atlas registry → get path
+  │     ├─ Atlas cwd detection → current project
+  │     └─ No atlas / no match → use cwd, check for .claude/relay.yaml directly
   │
-  ├─ 2. Explicit tracker?
-  │     ├─ --tracker gitlab → use gitlab tracker, skip routing
+  ├─ 2. Read .claude/relay.yaml from project path
+  │     ├─ Found → load issue_trackers config
+  │     └─ Missing → ask user which tracker to use (offer to create config)
+  │
+  ├─ 3. Explicit --tracker?
+  │     ├─ --tracker gitlab → use that tracker from config, skip routing rules
   │     └─ No → continue to routing rules
   │
-  ├─ 3. Load project's issue_trackers[] from atlas
-  │
-  ├─ 4. Evaluate routing rules (in order)
+  ├─ 4. Evaluate routing rules (in order, across all trackers)
   │     │
   │     │  For each tracker's routing_rules:
   │     │    match:
@@ -41,15 +70,16 @@ When a user creates an issue via relay, the routing engine determines which trac
   ├─ 6. No default? → ask user which tracker to use
   │
   └─ 7. Create issue via adapter
-        ├─ Also create beads cross-reference (if beads configured)
+        ├─ Also create beads cross-reference (if beads tracker configured)
         └─ Return issue URL/ID
 ```
 
-## Routing Rules Examples
+## Config Examples
 
 ### Example 1: Bugs to GitLab, Agent Tasks to Beads
 
 ```yaml
+# .claude/relay.yaml
 issue_trackers:
   - name: gitlab
     type: gitlab
@@ -66,9 +96,9 @@ issue_trackers:
     scope: local
     routing_rules:
       - match: { source: agent }
-        action: { default: true }     # Agent work stays local
+        action: { default: true }
       - match: { type: task }
-        action: { default: true }     # Quick tasks stay local
+        action: { default: true }
 ```
 
 ### Example 2: Critical to Jira, Rest to GitHub
@@ -88,16 +118,27 @@ issue_trackers:
     default: true
 ```
 
-### Example 3: Cross-Project Issue
+### Example 3: Single Tracker (Simple)
+
+```yaml
+issue_trackers:
+  - name: github
+    type: github
+    repo: "iVintik/clawrig"
+    default: true
+```
+
+## Cross-Project Issues
 
 ```
 /relay:issue "API contract changed, update SDK" --project digital-web-sdk
 ```
 
 When creating an issue for a different project than cwd:
-1. Resolve target project from atlas
-2. Route using target project's trackers (not current project's)
-3. Include cross-reference to source project in issue body
+1. Resolve target project path via atlas registry
+2. Read target project's `.claude/relay.yaml`
+3. Route using target project's trackers (not current project's)
+4. Include cross-reference to source project in issue body
 
 ## Beads Cross-References
 
@@ -111,6 +152,8 @@ bd create --type task \
 ```
 
 This allows `bd ready` and `bd list` to show external issues alongside local ones.
+
+Condition: beads cross-referencing only happens if the project's `.claude/relay.yaml` includes a `type: beads` tracker entry.
 
 ## Issue Fields Mapping
 
@@ -126,3 +169,18 @@ Relay uses a generic issue model that adapters map to tracker-specific fields:
 | assignee | assignees[] | assignee_ids[] | assignee | — |
 | milestone | milestone | milestone_id | fixVersion | — |
 | parent | — | — | parent (epic link) | dependency |
+
+## Relay Config Initialization
+
+```
+/relay:trackers init
+```
+
+If `.claude/relay.yaml` doesn't exist, relay offers to create one:
+1. Check repo type from `.git/config` (or atlas)
+2. Suggest default tracker based on repo host:
+   - `github.com` → github adapter
+   - `gitlab.*` → gitlab adapter
+   - Otherwise → ask
+3. Ask about additional trackers (beads for local work?)
+4. Write `.claude/relay.yaml`

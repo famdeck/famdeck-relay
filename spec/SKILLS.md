@@ -29,15 +29,16 @@
 
 ### Flow
 
-1. Resolve project (atlas lookup or `--project`)
-2. If `--tracker` specified → skip routing, use that tracker
-3. Else → evaluate routing rules from project config
-4. Determine adapter (gitlab/github/jira/beads)
-5. Check adapter availability (MCP installed? CLI available?)
-6. If `--body` not provided → ask user for description, or generate from context
-7. Create issue via adapter
-8. If beads configured and not `--no-beads` → create beads cross-reference
-9. Print: issue URL/ID, tracker used, labels applied
+1. Resolve project (atlas registry lookup, cwd detection, or `--project`)
+2. Read `.claude/relay.yaml` from project path for tracker config
+3. If `--tracker` specified → skip routing, use that tracker
+4. Else → evaluate routing rules from `.claude/relay.yaml`
+5. Determine adapter (gitlab/github/jira/beads)
+6. Check adapter availability (MCP installed? CLI available?)
+7. If `--body` not provided → ask user for description, or generate from context
+8. Create issue via adapter
+9. If beads tracker configured and not `--no-beads` → create beads cross-reference
+10. Print: issue URL/ID, tracker used, labels applied
 
 ### Cross-Project Issues
 
@@ -157,8 +158,9 @@ Present options:
 
 ### Flow
 
-1. Resolve project(s) from atlas
-2. For each project's configured trackers:
+1. Resolve project(s) from atlas registry
+2. For each project, read `.claude/relay.yaml` for tracker list
+3. For each tracker:
    - Query issues via adapter
    - Collect results
 3. Merge and display as unified table:
@@ -184,3 +186,59 @@ clawrig
 - Queries run in parallel across trackers
 - Cache results for 5 minutes (avoid hammering APIs)
 - Show stale indicator if cached data is old
+
+---
+
+## Skill: /relay:trackers
+
+**Purpose**: Manage the per-project issue tracker configuration (`.claude/relay.yaml`).
+
+### Usage
+
+```
+/relay:trackers                                 # Show current project's tracker config
+/relay:trackers init                            # Create .claude/relay.yaml for current project
+/relay:trackers add                             # Add a tracker to current project
+/relay:trackers remove gitlab                   # Remove a tracker
+/relay:trackers --project digital-web-sdk       # Show another project's config
+```
+
+### Subcommands
+
+#### `show` (default)
+
+Display the current project's `.claude/relay.yaml` in a readable format:
+
+```
+digital-web-sdk — Issue Trackers:
+  1. gitlab (default) — project: digital/web-sdk — labels: sdk, web
+     Rules: bugs+critical → @team-lead +urgent
+  2. beads (local)
+     Rules: agent tasks → beads, quick tasks → beads
+```
+
+#### `init`
+
+Create `.claude/relay.yaml` if it doesn't exist:
+
+1. Detect repo host from `.git/config` (or atlas)
+2. Suggest primary tracker:
+   - `github.com` → github adapter, repo auto-detected
+   - `gitlab.*` → gitlab adapter, project_id auto-detected
+   - Otherwise → ask
+3. Ask: "Also track local/agent work in beads?" → add beads tracker
+4. Write `.claude/relay.yaml` to project repo
+
+#### `add`
+
+Add a new tracker interactively:
+
+1. Ask tracker type (github, gitlab, jira, beads)
+2. Ask tracker-specific config (project_id, repo, project_key)
+3. Ask for default labels
+4. Ask about routing rules
+5. Append to `.claude/relay.yaml`
+
+#### `remove`
+
+Remove a tracker by name from `.claude/relay.yaml`.
