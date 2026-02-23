@@ -50,60 +50,47 @@ When `--project` differs from cwd project:
 
 ## Skill: /relay:handoff
 
-**Purpose**: Serialize current work context and transfer to another session, tool, or person.
+**Purpose**: Capture current work context as a beads issue for later pickup.
 
 ### Usage
 
 ```
-/relay:handoff                                  # Interactive: choose target
-/relay:handoff --to clawrig                     # Transfer to ClawRig session
-/relay:handoff --to person:colleague@email.com  # Hand off to a person
-/relay:handoff --to agent:task-agent            # Delegate to autonomous agent
-/relay:handoff --to self                        # Save for self (cross-machine)
-/relay:handoff --save-only                      # Just save envelope, don't transfer
+/relay:handoff                                  # Create handoff with auto-generated context
+/relay:handoff --summary "JWT refresh done"     # Override summary
+/relay:handoff --instructions "Focus on tests"  # Add instructions for recipient
 ```
 
 ### Parameters
 
 | Parameter | Required | Default | Description |
 |---|---|---|---|
-| `--to` | No | Interactive | Target: clawrig, person:{id}, agent:{name}, self |
 | `--summary` | No | Auto-generated | Work summary override |
-| `--include-diff` | No | true | Include git diff in envelope |
-| `--include-beads` | No | true | Include beads export |
-| `--save-only` | No | false | Save but don't transfer |
 | `--instructions` | No | None | Instructions for recipient |
 
 ### Flow
 
-1. **Gather project context** from atlas
-2. **Gather git state**: branch, commit, `git diff` (staged + unstaged)
-3. **Gather beads state**: `bd list --status in_progress`, export related issues
-4. **Summarize work**: Ask Claude to produce summary, decisions, next steps
-5. **Build envelope**: Assemble all context into handoff JSON
-6. **Transfer**: Based on `--to` target type
-7. **Confirm**: Print handoff ID, summary, transfer status
+1. **Check prerequisites**: Verify `bd` CLI available
+2. **Gather project context** from atlas + git state (branch, commit, uncommitted)
+3. **Summarize work**: objective, decisions, next steps, files touched
+4. **Gather active issues**: `bd list --status in_progress --status open`
+5. **Create beads issue**: `bd create --type task --title "Handoff: {objective}" --label relay:handoff --label "handoff:from:{user}" --label "handoff:branch:{branch}"` with structured markdown description
+6. **Confirm**: Print issue ID, branch, objective
 
-### Interactive Mode (no `--to`)
+### Description Format
 
-Present options:
-1. Continue in ClawRig/OpenClaw
-2. Transfer to another machine (self)
-3. Hand off to a colleague
-4. Delegate to an agent
-5. Just save for later
+See `knowledge/handoff-protocol.md` for the structured markdown format (Objective, Branch, Summary, Decisions, Next Steps, Active Issues, Files Touched, Blockers, Notes).
 
 ---
 
 ## Skill: /relay:pickup
 
-**Purpose**: Resume work from a handoff envelope.
+**Purpose**: Resume work from a handoff beads issue.
 
 ### Usage
 
 ```
 /relay:pickup                                   # List and select pending handoffs
-/relay:pickup hf-a1b2c3d4                       # Resume specific handoff
+/relay:pickup bd-abc123                         # Resume specific handoff
 /relay:pickup --list                            # Just list, don't pick up
 ```
 
@@ -111,25 +98,19 @@ Present options:
 
 | Parameter | Required | Default | Description |
 |---|---|---|---|
-| handoff_id | No | Interactive | Specific handoff to resume |
+| issue_id | No | Interactive | Specific beads issue to resume |
 | `--list` | No | false | List only, don't pick up |
-| `--apply-diff` | No | ask | Apply git diff from envelope |
-| `--import-beads` | No | ask | Import beads issues |
 
 ### Flow
 
-1. **Discover handoffs**: Scan `~/.claude/relay/handoffs/` for pending envelopes
-2. **If git sync**: Pull latest from handoffs repo
-3. **List pending**: Show summary table (ID, project, summary, from, age)
+1. **Check prerequisites**: Verify `bd` CLI available
+2. **List handoffs**: `bd list --label relay:handoff --status open`
+3. **Display table**: ID, title, from (label), branch (label)
 4. **Select**: User picks handoff (or specified via argument)
-5. **Check project**: Is cwd the right project? If not, suggest `cd`
-6. **Check branch**: Is the right branch checked out? Offer to switch
-7. **Restore context**: Print full context (summary, decisions, next steps, blockers)
-8. **Apply artifacts**:
-   - Git diff → offer to apply (`git apply`)
-   - Beads JSONL → offer to import (`bd import`)
-9. **Mark picked up**: Update envelope status
-10. **Ready**: Session now has full context to continue work
+5. **Restore context**: `bd show {id}` — parse and display structured sections
+6. **Check branch**: Compare current branch with handoff's branch label
+7. **Mark picked up**: `bd update {id} --status in_progress`
+8. **Ready**: Print next steps and remind to `bd close {id}` when done
 
 ---
 

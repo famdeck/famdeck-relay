@@ -2,276 +2,137 @@
 
 ## Overview
 
-Handoff is the mechanism for transferring work context between sessions, tools, and people. The handoff envelope is a self-contained JSON document that captures everything needed to resume work.
+Handoffs capture work context as **beads issues** with the `relay:handoff` label. They are committed to git, branch-scoped, and readable via `bd show`.
 
-## Use Cases
+For cross-project messaging (between different repos/agents), use **mcp_agent_mail** instead. See `spec/MESSAGING.md`.
 
-| From | To | Transfer Method | Example |
-|---|---|---|---|
-| Claude Code | ClawRig/OpenClaw | ClawRig API | "Continue this in chat" |
-| Claude Code (PC1) | Claude Code (PC2) | Git sync / shared store | "Pick up on my desktop" |
-| Person A | Person B | Git / shared store | "Can you finish this?" |
-| Claude Code | Autonomous agent | Beads issue + handoff | "Agent, handle this" |
-| Session | Same session later | Local store | "I'll continue tomorrow" |
+## Storage Model
 
-## Handoff Envelope Schema
+| Aspect | Value |
+|--------|-------|
+| Storage | `.beads/` directory (same as all beads issues) |
+| Scoping | Branch-scoped (committed to git) |
+| Format | Structured markdown in issue description |
+| Discovery | `bd list --label relay:handoff --status open` |
+| Lifecycle | open → in_progress → closed |
 
-```json
-{
-  "$schema": "relay/handoff-v1",
-  "handoff_id": "hf-a1b2c3d4",
-  "version": 1,
-  "created_at": "2026-02-22T10:30:00Z",
-  "expires_at": "2026-03-01T10:30:00Z",
-  "status": "pending",
+### Why Beads, Not Global Files?
 
-  "from": {
-    "tool": "claude-code",
-    "user": "ivintik",
-    "machine": "macbook-pro",
-    "session_id": "abc123",
-    "working_directory": "/Users/ivintik/dev/digital/web-sdk"
-  },
+The previous design stored handoffs as JSON envelopes in `~/.claude/relay/handoffs/`. Problems:
+- Detached from project — no branch context
+- No transport — couldn't switch branches and see relevant handoffs
+- No acknowledgment — status tracking was fragile
+- Not committed — lost on machine changes
 
-  "project": {
-    "slug": "digital-web-sdk",
-    "name": "Digital Personalization Web SDK",
-    "repo_url": "https://git.angara.cloud/digital/web-sdk",
-    "repo_type": "gitlab",
-    "branch": "feature/jwt-refresh",
-    "commit": "a1b2c3d4e5f6",
-    "has_uncommitted_changes": true
-  },
+Beads issues solve all of these: they're in-project, branch-scoped, committed, and have built-in status management.
 
-  "context": {
-    "summary": "Working on JWT token refresh bug. Root cause: refresh token isn't rotated on use, causing replay attacks after expiry.",
+## Handoff Context
 
-    "objective": "Implement refresh token rotation in auth-service.ts",
+The issue description uses structured markdown (see `knowledge/handoff-protocol.md` for full schema):
 
-    "files_touched": [
-      {
-        "path": "src/auth-service.ts",
-        "action": "modified",
-        "summary": "Added rotation logic in refreshToken() method"
-      },
-      {
-        "path": "src/token-store.ts",
-        "action": "modified",
-        "summary": "Added invalidateToken() for old refresh tokens"
-      }
-    ],
+```markdown
+## Objective
+JWT token refresh implementation
 
-    "decisions_made": [
-      {
-        "decision": "Use refresh token rotation instead of sliding expiry",
-        "rationale": "Rotation provides better security against token theft",
-        "alternatives_considered": ["Sliding window expiry", "Short-lived tokens only"]
-      }
-    ],
+## Branch
+feature/jwt @ abc123 (uncommitted changes: yes)
 
-    "issues_active": [
-      {
-        "source": "beads",
-        "id": "bd-x1y2",
-        "title": "Implement token rotation",
-        "status": "in_progress"
-      },
-      {
-        "source": "gitlab",
-        "id": "42",
-        "url": "https://git.example.com/project/-/issues/42",
-        "title": "JWT refresh broken after 24h",
-        "status": "open"
-      }
-    ],
+## Summary
+Implemented refresh token rotation. Need to add tests.
 
-    "next_steps": [
-      "Complete refreshToken() implementation in auth-service.ts:142",
-      "Add unit tests in auth-service.test.ts",
-      "Test with expired tokens (use mock clock)",
-      "Update API docs for new refresh behavior"
-    ],
+## Decisions
+- Use refresh token rotation (better security against token theft)
 
-    "blockers": [],
+## Next Steps
+1. Add unit tests for token rotation
+2. Test with mock clock
+3. Update API docs
 
-    "notes": "Token store uses IndexedDB in browser, AsyncStorage in React Native. Both paths need testing."
-  },
+## Active Issues
+- [beads] bd-xyz: Implement token rotation (in_progress)
 
-  "target": {
-    "type": "person",
-    "identifier": "colleague@email.com",
-    "tool_preference": "claude-code",
-    "instructions": "Focus on the test coverage, I've done the implementation."
-  },
+## Files Touched
+- src/auth-service.ts (modified): Added rotation logic
+- src/token-store.ts (created): New token persistence
 
-  "artifacts": {
-    "git_diff": "base64-encoded unified diff of uncommitted changes",
-    "beads_export": "JSONL export of related beads issues",
-    "files_snapshot": {}
-  }
-}
+## Notes
+Free-form context...
 ```
 
-## Handoff Flow
+### Why Structured Markdown?
+
+- **Human-readable**: `bd show` displays it directly
+- **Parseable**: Skills can extract sections by heading
+- **Lightweight**: No embedded base64 diffs or JSONL exports
+
+## Labels
+
+| Label | Purpose |
+|-------|---------|
+| `relay:handoff` | Identifies as handoff (required) |
+| `handoff:from:<user>` | Creator |
+| `handoff:branch:<branch>` | Source branch |
+| `handoff:target:<type>` | Intended recipient type |
+
+## Flows
 
 ### Creating a Handoff
 
 ```
 /relay:handoff
-/relay:handoff --to clawrig
-/relay:handoff --to person:colleague@email.com
-/relay:handoff --to agent:task-agent
-/relay:handoff --save-only                     # Don't transfer, just save
+/relay:handoff --summary "JWT refresh implementation"
+/relay:handoff --instructions "Focus on test coverage"
 ```
 
-**Steps:**
-
-1. **Gather Context**
-   - Read atlas project info for current cwd
-   - Get git status (branch, commit, uncommitted changes)
-   - Get active beads issues (`bd list --status in_progress`)
-   - Ask Claude to summarize current work (objective, decisions, next steps)
-
-2. **Build Envelope**
-   - Populate all fields from gathered context
-   - Generate `handoff_id` (hash-based, like beads)
-   - Capture git diff if uncommitted changes exist
-   - Export related beads issues to JSONL
-
-3. **Transfer**
-   - **ClawRig**: POST envelope to ClawRig API → spawns session
-   - **Local**: Save to `~/.claude/relay/handoffs/`
-   - **Git sync**: Commit envelope to shared handoffs repo
-   - **Person**: Save locally + print instructions for recipient
-
-4. **Confirm**
-   - Print handoff ID and summary
-   - If beads active: update beads issue notes with handoff reference
+1. Gather project context (atlas + git state)
+2. Summarize work (objective, decisions, next steps, files)
+3. Create beads issue with `relay:handoff` label
+4. Print handoff ID and summary
 
 ### Picking Up a Handoff
 
 ```
 /relay:pickup
-/relay:pickup hf-a1b2c3d4
-/relay:pickup --list                           # Show all pending handoffs
+/relay:pickup bd-abc123
+/relay:pickup --list
 ```
 
-**Steps:**
+1. Query beads for `relay:handoff` labeled open issues
+2. Select (interactive if multiple)
+3. Display full context from description
+4. Check branch match
+5. Mark as `in_progress`
 
-1. **Discover**
-   - List pending handoffs from `~/.claude/relay/handoffs/`
-   - If git sync configured: pull latest handoffs
-   - Show summary of each (project, summary, from, created_at)
+### Completing a Handoff
 
-2. **Select** (if multiple)
-   - User picks which handoff to resume
-
-3. **Restore Context**
-   - Print project info (from envelope)
-   - Print summary, decisions, next steps
-   - If git diff included: offer to apply it
-   - If beads export included: import issues (`bd import`)
-   - If different project: suggest `cd` to project path
-
-4. **Mark as Picked Up**
-   - Update envelope status: `pending` → `picked_up`
-   - Record who picked it up and when
-
-## Handoff Targets
-
-### ClawRig Target
-
-```json
-{
-  "type": "session",
-  "identifier": "clawrig",
-  "tool_preference": "openclaw"
-}
+```bash
+bd close <id>
 ```
 
-Transfer: POST to `@clawrig/claudeman-api` endpoint.
-ClawRig's `claudeman-skill` creates a new Claude Code session with handoff context injected.
+No special skill needed — standard beads lifecycle.
 
-### Agent Target
+## Branch Scoping
 
-```json
-{
-  "type": "agent",
-  "identifier": "task-agent",
-  "tool_preference": "claude-code"
-}
-```
+Handoffs are committed with the beads data. When you switch branches:
+- `post-checkout` hook imports the target branch's beads state
+- Handoffs created on `feature/jwt` are only visible on that branch (and descendants)
+- After merging `feature/jwt` → `main`, the handoff appears on `main` too
 
-Transfer:
-1. Create beads issue from handoff (if not exists)
-2. Set issue status to `open` with handoff context in notes
-3. Agent discovers via `bd ready` on next session
+## Artifacts
 
-### Person Target
+Handoffs do **not** embed git diffs or beads exports. Instead:
+- The description records the commit hash and uncommitted-changes flag
+- Active issues are listed by reference (source + ID)
+- The recipient checks out the branch to get the full code state
 
-```json
-{
-  "type": "person",
-  "identifier": "colleague@email.com",
-  "tool_preference": "claude-code"
-}
-```
+This avoids stale embedded data and keeps handoffs small.
 
-Transfer:
-1. Save envelope to shared location (git repo, file share)
-2. Optionally notify via configured channel (future: slack, email)
-3. Recipient runs `/relay:pickup` to resume
+## Cross-Project Handoffs
 
-### Self (Cross-Machine)
-
-```json
-{
-  "type": "self",
-  "identifier": "ivintik",
-  "tool_preference": "claude-code"
-}
-```
-
-Transfer:
-1. Push branch with changes
-2. Save envelope to git-synced handoffs repo
-3. On other machine: pull, `/relay:pickup`
-
-## Handoff Lifecycle
+For handing off work to a different project/repo, use mcp_agent_mail messaging:
 
 ```
-pending → picked_up → completed
-                   → expired (after expires_at)
-                   → cancelled (manual)
+send_message(to="agent", subject="Handoff: ...", body="...", thread_id="handoff-...")
 ```
 
-Expired handoffs are auto-archived on next `/relay:pickup --list`.
-
-## Handoff Storage Sync Options
-
-### Local Only (Default)
-
-```yaml
-# ~/.claude/relay/config.yaml
-handoff_sync: local
-```
-
-Handoffs stored in `~/.claude/relay/handoffs/`. No sync. Good for single-machine use.
-
-### Git Sync
-
-```yaml
-handoff_sync: git
-handoff_repo: https://github.com/user/handoffs.git
-handoff_branch: main
-```
-
-Handoffs committed and pushed to a shared repo. Recipients pull to discover.
-
-### None (Inline)
-
-```yaml
-handoff_sync: none
-```
-
-Handoffs printed to stdout as JSON. User copies/pastes or pipes to another tool.
+Beads handoffs are strictly **within-project**. Cross-project coordination is a messaging concern, not a task-tracking concern.

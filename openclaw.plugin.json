@@ -1,0 +1,17 @@
+{
+  "id": "clawrig-relay",
+  "name": "ClawRig Relay",
+  "description": "Cross-project issue routing, work handoffs, and messaging for multi-project agent workflows",
+  "skills": ["./openclaw-skills"],
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "mailUrl": {
+        "type": "string",
+        "default": "http://localhost:8765",
+        "description": "mcp_agent_mail server URL"
+      }
+    }
+  }
+}
