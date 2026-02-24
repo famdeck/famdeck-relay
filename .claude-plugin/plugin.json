@@ -1,6 +1,6 @@
 {
   "name": "relay",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Cross-project issue routing and work handoff between sessions, tools, and people",
   "author": {
     "name": "ClawRig"

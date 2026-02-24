@@ -1,6 +1,6 @@
 {
   "name": "clawrig-relay",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "type": "module",
   "description": "ClawRig Relay - issue routing, handoffs, messaging for OpenClaw",
   "license": "MIT",
@@ -9,7 +9,7 @@
     "url": "https://github.com/clawrig/relay.git"
   },
   "keywords": ["openclaw", "openclaw-plugin", "clawrig", "issue-routing", "handoffs", "agent-workflows"],
-  "files": ["index.ts", "openclaw.plugin.json", "openclaw-skills", "LICENSE"],
+  "files": ["index.ts", "openclaw.plugin.json", "openclaw-skills", "cli", "bin", "LICENSE"],
   "openclaw": { "extensions": ["./index.ts"] },
   "peerDependencies": { "openclaw": "*" }
 }

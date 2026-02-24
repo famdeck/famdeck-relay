@@ -1,0 +1,11 @@
+#!/usr/bin/env python3
+"""Relay CLI entry point."""
+import sys
+from pathlib import Path
+
+# Add plugin root to path so cli package is importable
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from cli.main import main
+
+main()

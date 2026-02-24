@@ -1,59 +1,93 @@
 # Relay — Development Guide
 
-## Structure
+## Architecture
 
 ```
 relay/
-├── .claude-plugin/plugin.json    # Plugin manifest
-├── skills/                       # 5 skills (issue, handoff, pickup, status, trackers)
-├── knowledge/                    # 6 knowledge files referenced by skills
+├── cli/                          # Python CLI (the "engine")
+│   ├── main.py                   # Entry point, argparse, subcommands
+│   ├── config.py                 # Config reading/writing, atlas integration
+│   ├── routing.py                # Routing rule evaluation
+│   └── adapters.py               # Adapter dispatch (gh/bd CLI, MCP instructions)
+├── bin/relay                     # Global entry script (symlink to ~/.local/bin/relay)
+├── skills/                       # Thin skill wrappers (the "coach")
+│   ├── issue/SKILL.md
+│   ├── trackers/SKILL.md
+│   ├── status/SKILL.md
+│   ├── handoff/SKILL.md
+│   └── pickup/SKILL.md
+├── openclaw-skills/              # OpenClaw format skills (same content)
 ├── agents/router.md              # Auto-routing agent
-├── hooks/                        # SessionStart hook for Atlas provider registration
-├── spec/                         # Design specifications (source of truth)
-└── CLAUDE.md                     # This file
+├── hooks/hooks.json              # SessionStart + PreCompact hooks
+├── hooks/scripts/                # Hook scripts
+├── knowledge/                    # Reference docs (kept for spec)
+└── spec/                         # Design specifications
 ```
 
-## Conventions
+## Key Principle: CLI is Engine, Skill is Coach
 
-- Skills are structured prompts, not executable code. They instruct Claude on what steps to perform.
-- Knowledge files contain reference data (schemas, mappings, decision trees) that skills reference with `Refer to knowledge/<file>.md`.
-- The `spec/` directory is the design source of truth. When skill behavior conflicts with spec, spec wins.
-- Per-project config lives at `<project-root>/.claude/relay.yaml`.
+Skills are thin (~30 lines) wrappers that call `relay <command>`.
+The CLI handles all deterministic logic: config parsing, routing, adapter dispatch.
+Skills only handle MCP tool calls (GitLab/Jira) and user interaction.
 
-## Two Communication Models
+## CLI Commands
 
-| Model | Storage | Scope | Tool |
-|-------|---------|-------|------|
-| Handoffs | Beads issues (`.beads/`) | Within-project, branch-scoped | `bd` CLI |
-| Messages | mcp_agent_mail | Cross-project | MCP tools |
+```bash
+relay prime                       # Session context (run by hooks)
+relay issue "title" [flags]       # Create and route an issue
+relay route "title" [flags]       # Dry-run routing
+relay trackers [show|init|add|remove]
+relay status [--all]
+relay handoff [--summary "..."]
+relay pickup [issue_id|--list]
+```
 
-## Key Dependencies
+Output is JSON by default (`--format text` for human-readable).
 
-| Dependency | Required? | How to check |
+## Hooks
+
+- **SessionStart**: Registers atlas providers + runs `relay prime`
+- **PreCompact**: Runs `relay prime` (context survives compaction)
+
+## Adapter Model
+
+| Tracker | Method | Tool |
+|---------|--------|------|
+| GitHub | CLI (direct) | `gh` |
+| Beads | CLI (direct) | `bd` |
+| GitLab | MCP (via Claude) | `mcp__plugin_ds_gitlab__*` |
+| Jira | MCP (via Claude) | `mcp__plugin_ds_atlassian__jira_*` |
+
+CLI-based adapters execute directly and return results.
+MCP-based adapters return `{"status": "needs_mcp", "tool": "...", "params": {...}}` for Claude to execute.
+
+## Dependencies
+
+| Dependency | Required? | Check |
 |---|---|---|
-| Atlas plugin | Recommended | `~/.claude/atlas/registry.yaml` exists |
-| Beads CLI (`bd`) | Required for handoffs | `which bd` |
-| mcp_agent_mail | Required | `curl -s http://localhost:8765/health/liveness` |
-| GitHub CLI (`gh`) | Optional | `which gh` |
-| GitLab MCP | Optional | ToolSearch for `mcp__plugin_ds_gitlab__*` |
-| Jira MCP | Optional | ToolSearch for `mcp__plugin_ds_atlassian__jira_*` |
+| Python 3.8+ | Yes | `python3 --version` |
+| PyYAML | Yes | `python3 -c "import yaml"` |
+| Atlas plugin | Recommended | `~/.claude/atlas/registry.yaml` |
+| Beads CLI | For handoffs | `which bd` |
+| GitHub CLI | For GitHub tracker | `which gh` |
+| GitLab MCP | For GitLab tracker | ToolSearch |
+| Jira MCP | For Jira tracker | ToolSearch |
 
-## File Budgets
+## Config Schema
 
-| Component | Target Size |
-|---|---|
-| Knowledge files | 2-5 KB each |
-| Skill files | 3-4 KB each |
-| Agent | < 2 KB |
-| Hook script | < 1 KB |
+Per-project: `<project-root>/.claude/relay.yaml`
 
-## Testing
-
-Manual verification:
-1. `/relay:trackers init` — creates valid `.claude/relay.yaml`
-2. `/relay:trackers show` — displays config correctly
-3. `/relay:issue "test"` — routes based on config
-4. `/relay:handoff` — creates beads issue with `relay:handoff` label
-5. `/relay:pickup --list` — lists handoff issues on current branch
-6. `/relay:pickup` — restores context from a handoff
-7. `/relay:status` — queries configured trackers
+```yaml
+issue_trackers:
+  - name: <string>          # Unique name
+    type: github|gitlab|jira|beads
+    default: true            # Fallback tracker
+    repo: "org/repo"         # GitHub
+    project_id: "group/proj" # GitLab
+    project_key: "PROJ"      # Jira
+    scope: local             # Beads
+    labels: [default-labels]
+    routing_rules:
+      - match: { type: bug, priority: [critical, high], source: agent }
+        action: { default: true, labels: [urgent], assignee: "@user" }
+```

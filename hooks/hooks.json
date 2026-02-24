@@ -8,6 +8,25 @@
             "type": "command",
             "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/register-provider.py",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "python3 -m cli.main --format text prime",
+            "timeout": 10,
+            "cwd": "${CLAUDE_PLUGIN_ROOT}"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -m cli.main --format text prime",
+            "timeout": 10,
+            "cwd": "${CLAUDE_PLUGIN_ROOT}"
           }
         ]
       }
