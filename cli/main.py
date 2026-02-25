@@ -55,7 +55,8 @@ def cmd_prime(args):
     lines = [f"# Relay — {slug}", ""]
 
     if not config:
-        lines.append("No tracker config. Run `/relay:trackers init` to set up.")
+        lines.append("No tracker config for this project. Run `/relay:trackers init` to set up.")
+        lines.append("To file issues in OTHER projects: /relay:issue \"title\" --project <slug>")
         print("\n".join(lines))
         return
 
@@ -73,8 +74,13 @@ def cmd_prime(args):
             lines.append(f"     Rule: {match_str} → {action_str}")
 
     lines.append("")
+    lines.append("## When to create issues")
+    lines.append("  When you discover a bug or problem in ANY project (not just the current one),")
+    lines.append("  use /relay:issue to file it. Use --project <slug> for cross-project issues.")
+    lines.append("  Do NOT silently fix problems without tracking — file an issue first or alongside the fix.")
+    lines.append("")
     lines.append("## Commands")
-    lines.append("  relay issue \"title\" [--type bug|task|feature|chore] [--priority critical|high|medium|low] [--body \"...\"]")
+    lines.append("  relay issue \"title\" [--type bug|task|feature|chore] [--priority critical|high|medium|low] [--body \"...\"] [--project <slug>]")
     lines.append("  relay route \"title\" --type bug --priority high  (dry-run, shows which tracker)")
     lines.append("  relay trackers [show|init|add|remove]")
     lines.append("  relay status [--all]")
