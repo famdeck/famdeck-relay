@@ -1,6 +1,6 @@
 ---
 name: issue
-description: Create and route an issue to the right tracker based on project config — supports GitHub, GitLab, Jira, and beads. Use when creating issues, filing bugs, requesting features, or logging tasks across projects.
+description: Create and route an issue to the right tracker based on project config — supports GitHub, GitLab, Jira, and beads. Use when creating issues, filing bugs, requesting features, or logging tasks across projects. IMPORTANT — use this PROACTIVELY whenever you discover a bug, needed fix, or improvement in a project OTHER than the one you're currently working in. Don't just fix cached/local copies and move on — file the issue upstream so it gets tracked and properly fixed. Use atlas to resolve the target project slug.
 argument-hint: '"title" [--project <slug>] [--tracker <name>] [--type bug|task|feature|chore] [--priority critical|high|medium|low] [--labels <l1,l2>] [--assignee <user>] [--body <text>] [--no-beads]'
 allowed-tools: "Read,Bash(relay:*),ToolSearch,Bash(which:*)"
 ---
