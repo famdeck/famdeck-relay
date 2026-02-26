@@ -11,9 +11,8 @@
           },
           {
             "type": "command",
-            "command": "python3 -m cli.main --format text prime",
-            "timeout": 10,
-            "cwd": "${CLAUDE_PLUGIN_ROOT}"
+            "command": "cd ${CLAUDE_PLUGIN_ROOT} && python3 -m cli.main --format text prime",
+            "timeout": 10
           }
         ]
       }
@@ -24,9 +23,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -m cli.main --format text prime",
-            "timeout": 10,
-            "cwd": "${CLAUDE_PLUGIN_ROOT}"
+            "command": "cd ${CLAUDE_PLUGIN_ROOT} && python3 -m cli.main --format text prime",
+            "timeout": 10
           }
         ]
       }
