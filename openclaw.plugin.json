@@ -1,6 +1,6 @@
 {
-  "id": "clawrig-relay",
-  "name": "ClawRig Relay",
+  "id": "famdeck-relay",
+  "name": "Famdeck Relay",
   "description": "Cross-project issue routing, work handoffs, and messaging for multi-project agent workflows",
   "skills": ["./openclaw-skills"],
   "configSchema": {

@@ -1,14 +1,14 @@
 {
-  "name": "clawrig-relay",
+  "name": "famdeck-relay",
   "version": "0.4.0",
   "type": "module",
-  "description": "ClawRig Relay - issue routing, handoffs, messaging for OpenClaw",
+  "description": "Famdeck Relay - issue routing, handoffs, messaging for OpenClaw",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/clawrig/relay.git"
+    "url": "https://github.com/famdeck/relay.git"
   },
-  "keywords": ["openclaw", "openclaw-plugin", "clawrig", "issue-routing", "handoffs", "agent-workflows"],
+  "keywords": ["openclaw", "openclaw-plugin", "famdeck", "issue-routing", "handoffs", "agent-workflows"],
   "files": ["index.ts", "openclaw.plugin.json", "openclaw-skills", "cli", "bin", "LICENSE"],
   "openclaw": { "extensions": ["./index.ts"] },
   "peerDependencies": { "openclaw": "*" }

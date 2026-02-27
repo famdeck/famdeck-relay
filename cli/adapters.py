@@ -15,9 +15,9 @@ def check_adapter(tracker_type: str) -> dict:
     """
     checks = {
         "github": ("gh", "GitHub CLI — https://cli.github.com/"),
-        "beads": ("bd", "Beads CLI — /clawrig-toolkit:toolkit-setup"),
-        "gitlab": (None, "GitLab MCP — /clawrig-toolkit:toolkit-setup"),
-        "jira": (None, "Jira MCP — /clawrig-toolkit:toolkit-setup"),
+        "beads": ("bd", "Beads CLI — /famdeck-toolkit:toolkit-setup"),
+        "gitlab": (None, "GitLab MCP — /famdeck-toolkit:toolkit-setup"),
+        "jira": (None, "Jira MCP — /famdeck-toolkit:toolkit-setup"),
     }
     tool, hint = checks.get(tracker_type, (None, "Unknown tracker type"))
 

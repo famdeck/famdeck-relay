@@ -124,7 +124,7 @@ issue_trackers:
 issue_trackers:
   - name: github
     type: github
-    repo: "iVintik/clawrig"
+    repo: "iVintik/famdeck"
     default: true
 ```
 

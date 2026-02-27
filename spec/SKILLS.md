@@ -156,7 +156,7 @@ digital-web-sdk
     bd-x1y2  [task]  Implement token rotation            in_progress
     bd-y3z4  [task]  Update auth docs                    open (blocked by bd-x1y2)
 
-clawrig
+famdeck
   GitHub:
     #12  [feature] Add project-ref MCP health check      open
     #10  [bug]     Session cleanup on timeout             open

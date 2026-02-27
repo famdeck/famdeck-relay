@@ -63,7 +63,7 @@ GitHub operations use `gh` CLI via bash, not MCP:
 
 ### Repo Resolution
 
-Atlas stores `repo` in tracker config (e.g., `"iVintik/clawrig"`). This maps directly to `gh --repo` parameter.
+Atlas stores `repo` in tracker config (e.g., `"iVintik/famdeck"`). This maps directly to `gh --repo` parameter.
 
 ## Jira Adapter
 

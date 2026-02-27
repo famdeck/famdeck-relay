@@ -368,7 +368,7 @@ def cmd_handoff(args):
     """Create a handoff beads issue."""
     import shutil
     if not shutil.which("bd"):
-        out({"status": "error", "message": "Beads CLI required. Install with /clawrig-toolkit:toolkit-setup"}, args.format)
+        out({"status": "error", "message": "Beads CLI required. Install with /famdeck-toolkit:toolkit-setup"}, args.format)
         sys.exit(1)
 
     project_path = find_project_path(args.project)
