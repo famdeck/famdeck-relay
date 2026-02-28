@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/famdeck/relay.git"
+    "url": "https://github.com/famdeck/famdeck-relay.git"
   },
   "keywords": ["openclaw", "openclaw-plugin", "famdeck", "issue-routing", "handoffs", "agent-workflows"],
   "files": ["index.ts", "openclaw.plugin.json", "openclaw-skills", "cli", "bin", "LICENSE"],

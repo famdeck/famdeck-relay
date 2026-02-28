@@ -2,7 +2,7 @@ issue_trackers:
   - name: github
     type: github
     default: true
-    repo: "famdeck/relay"
+    repo: "famdeck/famdeck-relay"
   - name: beads
     type: beads
     scope: local
