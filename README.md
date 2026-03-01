@@ -1,14 +1,12 @@
 # Famdeck Relay
 
-Issue routing, bidirectional sync, and work handoffs across trackers. Routes issues to GitHub, GitLab, Jira, or Beads based on per-project rules. Syncs BMAD sprint-status.yaml with Beads bidirectionally.
+Issue routing, bidirectional sync, and work handoffs for [Claude Code](https://claude.ai/claude-code). Routes issues to GitHub, GitLab, Jira, or Beads based on per-project rules. All interaction through slash commands in Claude Code sessions or the `relay` CLI.
 
 Part of the [Famdeck](https://github.com/famdeck/famdeck) autonomous development toolkit.
 
 ## Installation
 
 ### Via Marketplace (recommended)
-
-Relay is a Claude Code plugin distributed through the [famdeck-toolkit](https://github.com/famdeck/famdeck-toolkit):
 
 ```bash
 claude plugin marketplace add iVintik/private-claude-marketplace
@@ -31,23 +29,30 @@ ln -sf /path/to/famdeck-relay/bin/relay ~/.local/bin/relay
 ```
 
 Requires: Python >= 3.8, PyYAML.
-Optional: Beads CLI (`bd`), GitHub CLI (`gh`), GitLab MCP, Jira MCP.
-
-Verify: `relay prime`
+Optional: Beads CLI (`bd`), GitHub CLI (`gh`), GitLab MCP plugin, Jira MCP plugin.
 
 ## Setup
 
-Initialize tracker config for a project:
+Initialize tracker config for a project (auto-detects from git remote):
 
-```bash
-cd /path/to/your-project
-relay trackers init          # auto-detects GitHub/GitLab from git remote
-relay trackers show          # view current config
-relay trackers add --type gitlab --project-id group/project
-relay trackers remove --name gitlab
+```
+> /relay:trackers init
+
+Detected GitHub remote: org/my-app
+Created .claude/relay.yaml with:
+  - github (default) → org/my-app
+  - beads (local) → agent-created issues
 ```
 
-Creates `.claude/relay.yaml`:
+Or manage trackers manually:
+
+```
+> /relay:trackers add --type gitlab --name main --repo group/project --set-default
+> /relay:trackers show
+> /relay:trackers remove --name old-tracker
+```
+
+Config lives in `.claude/relay.yaml`:
 
 ```yaml
 issue_trackers:
@@ -61,114 +66,110 @@ issue_trackers:
     routing_rules:
       - match: { source: agent }
         action: { default: true }
-
-# Optional — all values have sensible defaults
-defaults:
-  cli_timeout: 30              # bd/gh command timeout (seconds)
-  git_timeout: 5               # git command timeout
-  handoff_timeout: 15          # handoff operation timeout
-  codeman_api_url: "http://localhost:3000"
-  codeman_timeout: 15
-  status_list_limit: 20
-  sprint_status_paths:         # where to find sprint-status.yaml
-    - "_bmad-output/implementation-artifacts/sprint-status.yaml"
-    - "_bmad-output/sprint-status.yaml"
-    - "sprint-status.yaml"
 ```
 
-## Commands
+## Skills
 
-### Issue Routing
+### `/relay:issue` — Create and Route Issues
+
+Create an issue and let Relay route it to the right tracker based on your rules:
+
+```
+> /relay:issue "Navbar breaks on mobile" --type bug --priority high
+
+Routing: type=bug, priority=high → github (rule: high-priority bugs)
+Created: org/my-app#142 [bug, urgent]
+```
+
+Cross-project issues:
+
+```
+> /relay:issue "Atlas registry stale" --type bug --project atlas
+```
+
+Force a specific tracker:
+
+```
+> /relay:issue "Internal cleanup" --tracker beads
+```
+
+Options: `--type` (bug|task|feature|chore), `--priority` (critical|high|medium|low), `--labels`, `--body`, `--tracker`, `--project`.
+
+### `/relay:status` — Cross-Project Issue Dashboard
+
+Unified view across all configured trackers:
+
+```
+> /relay:status --all
+
+my-app (github):
+  #142  [bug]     Navbar breaks on mobile        open
+  #138  [feature] Add dark mode support           open
+
+my-app (beads):
+  beads-042  [task]  Retry logic for sync engine  in_progress
+  beads-039  [bug]   Config path resolution       open
+
+atlas (beads):
+  beads-015  [bug]   Registry stale after rename  open
+```
+
+Options: `--all` (all projects), `--project`, `--tracker`, `--status` (open|all), `--limit`.
+
+### `/relay:handoff` — Save Work Context
+
+Capture your current work state for pickup in another session:
+
+```
+> /relay:handoff --summary "Halfway through auth refactor"
+
+Captured context:
+  Branch: feat/beads-042-auth-refactor
+  Commit: a1b2c3d (dirty: 3 files)
+  Created: beads-055 [relay:handoff]
+```
+
+If no summary given, Claude generates one from the conversation context.
+
+### `/relay:pickup` — Resume from Handoff
+
+```
+> /relay:pickup --list
+
+Pending handoffs:
+  beads-055  "Halfway through auth refactor"  (2h ago)
+  beads-048  "API tests passing, needs docs"  (1d ago)
+
+> /relay:pickup beads-055
+
+Restored context:
+  Objective: Auth refactor — extract token validation
+  Branch: feat/beads-042-auth-refactor
+  Decisions: Using jose instead of pyjwt
+  Next: Finish middleware integration, run tests
+```
+
+## CLI
+
+All skills wrap the `relay` CLI. You can also use it directly:
 
 ```bash
-# Create and route an issue
-relay issue "Fix the sync timeout" --type bug --priority high
-relay issue "Add dark mode" --type feature --priority medium --body "Details here"
-
-# Cross-project
-relay issue "Atlas registry stale" --type bug -p atlas
-
-# Dry-run — see where it would go
-relay route "Fix sync" --type bug --priority high
-
-# Force a specific tracker
-relay issue "Internal task" --tracker beads
+relay issue "Fix timeout" --type bug --priority high
+relay route "Fix timeout" --type bug --priority high    # dry-run routing
+relay sync                                               # auto-detect direction
+relay sync --direction bmad-to-beads --dry-run           # preview sync
+relay sync --check                                       # detect desyncs
+relay import --dry-run                                   # preview BMAD import
+relay import --epic 1                                    # import specific epic
+relay handoff --summary "Context here"
+relay pickup --list
+relay status --all
+relay prime                                              # session context output
 ```
-
-Issue types: `bug`, `task`, `feature`, `chore`.
-Priorities: `critical`, `high`, `medium`, `low`.
-
-### Bidirectional Sync
-
-Sync BMAD sprint-status.yaml with Beads issue statuses.
-
-```bash
-relay sync                              # auto-detect which side changed
-relay sync --direction bmad-to-beads    # force BMAD as source of truth
-relay sync --direction beads-to-bmad    # force Beads as source of truth
-relay sync --dry-run                    # preview without changes
-
-relay sync --check                      # detect desyncs (read-only, non-zero exit)
-relay sync --alert-conflicts            # create Beads issues for sync conflicts
-```
-
-Auto-detect uses `metadata.bmad_status` as a checkpoint: if the stored value differs from current BMAD status, BMAD changed; if Beads status differs from what BMAD implies, Beads changed; if both changed, it's a conflict.
-
-Transactional safety: Beads-to-BMAD sync writes BMAD first, then updates Beads metadata. If the second step fails, the first is rolled back.
-
-### BMAD Import
-
-Import stories from sprint-status.yaml into Beads.
-
-```bash
-relay import --dry-run       # preview
-relay import                 # execute
-relay import --epic 1        # only epic 1 stories
-```
-
-### Handoffs
-
-Save work context for later pickup.
-
-```bash
-relay handoff --summary "Halfway through auth refactor"
-relay handoff --summary "Done with API" --instructions "Run integration tests next"
-
-relay pickup --list          # list pending handoffs
-relay pickup beads-XXX       # restore context, mark in_progress
-```
-
-Captures: git branch, commit hash, dirty state, changed files.
-
-### Status Dashboard
-
-```bash
-relay status                 # current project
-relay status --all           # all atlas-registered projects
-relay status --tracker beads # filter to one tracker
-relay status --status all    # include closed issues
-```
-
-### Session Context
-
-```bash
-relay prime                  # output context block (run by hooks automatically)
-```
-
-## Adapter Model
-
-| Tracker | Method | Tool | Operations |
-|---------|--------|------|------------|
-| Beads | CLI | `bd` | Full CRUD — create, update, close, list, show, deps |
-| GitHub | CLI | `gh` | Create, list |
-| GitLab | MCP | `mcp__plugin_ds_gitlab__*` | Create, list (returns MCP instructions) |
-| Jira | MCP | `mcp__plugin_ds_atlassian__jira_*` | Create, list (returns MCP instructions) |
-
-CLI adapters execute directly and return results. MCP adapters return `{"status": "needs_mcp", "tool": "...", "params": {...}}` for Claude to execute.
 
 ## Routing Rules
 
-Rules in `relay.yaml` match issue properties and route to trackers:
+Rules in `.claude/relay.yaml` match issue properties and route to the right tracker:
 
 ```yaml
 issue_trackers:
@@ -188,17 +189,43 @@ issue_trackers:
         action: { default: true, labels: [agent-created] }
 ```
 
-Match conditions: `type`, `priority` (string or list), `source` (`human` or `agent`), `tags`.
-Actions: `default` (route here), `labels` (merge), `assignee` (set if not user-specified).
+Match conditions: `type`, `priority` (string or list), `source` (`human`/`agent`), `tags`.
+Actions: `default` (route here), `labels` (merge with tracker defaults), `assignee`.
 
-Rules are evaluated in config order. First match with `default: true` wins. If no rule matches, the tracker with `default: true` is used.
+Rules evaluate in config order. First match with `default: true` wins. No match falls back to the tracker with `default: true`.
+
+## Bidirectional Sync
+
+Syncs BMAD `sprint-status.yaml` with Beads issue statuses:
+
+```
+> relay sync
+
+Auto-detecting direction...
+BMAD status changed for 2 stories.
+  1.3: "in_progress" → "done" (synced to beads)
+  2.1: "ready" → "in_progress" (synced to beads)
+```
+
+Transactional safety: Beads-to-BMAD sync writes BMAD first, then updates Beads metadata. If the second step fails, the first is rolled back.
+
+## Adapter Model
+
+| Tracker | Method | Tool | Operations |
+|---------|--------|------|------------|
+| Beads | CLI | `bd` | Full CRUD — create, update, close, list, show, deps |
+| GitHub | CLI | `gh` | Create, list |
+| GitLab | MCP | `mcp__plugin_ds_gitlab__*` | Create, list |
+| Jira | MCP | `mcp__plugin_ds_atlassian__jira_*` | Create, list |
+
+CLI adapters execute directly. MCP adapters return instructions for Claude to execute the MCP tool call.
 
 ## Hooks
 
-Relay installs two Claude Code hooks:
+Relay installs two Claude Code hooks automatically:
 
-- **SessionStart**: Registers atlas providers + runs `relay prime` for session context
-- **PreCompact**: Runs `relay prime` so context survives compaction
+- **SessionStart** — registers Atlas providers + runs `relay prime` for session context
+- **PreCompact** — runs `relay prime` so context survives memory compaction
 
 ## Project Structure
 
@@ -206,21 +233,20 @@ Relay installs two Claude Code hooks:
 famdeck-relay/
   cli/
     main.py             # Entry point, argparse, subcommands
-    config.py           # relay.yaml read/write, atlas integration, defaults
+    config.py           # relay.yaml read/write, atlas integration
     routing.py          # Routing rule evaluation
-    adapters.py         # Adapter dispatch (BeadsAdapter, gh, GitLab MCP, Jira MCP)
+    adapters.py         # Adapter dispatch (Beads, gh, GitLab MCP, Jira MCP)
     sync.py             # Bidirectional BMAD <-> Beads sync engine
     bmad.py             # sprint-status.yaml reader/writer
     importer.py         # BMAD story import into Beads
-    codeman.py          # Ralph Loop session status adapter
     models.py           # Universal Issue model
   bin/relay             # CLI entry script
-  skills/               # Claude Code skill wrappers
+  skills/               # Claude Code skill definitions
   hooks/                # SessionStart + PreCompact hooks
   tests/                # 134 tests
 ```
 
-## Running Tests
+## Development
 
 ```bash
 python -m pytest tests/ -q    # 134 tests
