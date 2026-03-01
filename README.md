@@ -209,4 +209,4 @@ python -m pytest tests/ -q    # 134 tests
 
 ## License
 
-See [LICENSE](LICENSE) for details.
+MIT
