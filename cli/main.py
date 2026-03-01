@@ -14,6 +14,7 @@ from .config import (
 )
 from .routing import evaluate_rules, priority_to_number
 from .adapters import check_adapter, create_issue, list_issues
+from .importer import import_bmad_stories
 
 
 def out(data: dict, fmt: str = "json"):
@@ -488,6 +489,22 @@ def _gather_git_info(project_path: Path) -> dict:
     }
 
 
+def cmd_import(args):
+    """Import BMAD stories into Beads."""
+    project_path = find_project_path(args.project)
+    result = import_bmad_stories(
+        project_path=project_path,
+        dry_run=args.dry_run,
+        epic_filter=args.epic,
+    )
+    data = {"status": "ok", "action": "import", **result.to_dict()}
+    if result.errors:
+        data["status"] = "partial" if result.created or result.updated else "error"
+    out(data, args.format)
+    if data["status"] == "error":
+        sys.exit(1)
+
+
 # --- Main ---
 
 def main():
@@ -547,6 +564,11 @@ def main():
     p_pickup.add_argument("issue_id", nargs="?", help="Beads issue ID")
     p_pickup.add_argument("--list", action="store_true", help="List pending handoffs")
 
+    # import (BMAD → Beads)
+    p_import = sub.add_parser("import", help="Import BMAD stories into Beads")
+    p_import.add_argument("--dry-run", action="store_true", help="Preview without creating issues")
+    p_import.add_argument("--epic", type=int, help="Only import stories from this epic")
+
     args = parser.parse_args()
 
     if not args.command:
@@ -561,6 +583,7 @@ def main():
         "status": cmd_status,
         "handoff": cmd_handoff,
         "pickup": cmd_pickup,
+        "import": cmd_import,
     }
     handlers[args.command](args)
 
