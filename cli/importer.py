@@ -41,6 +41,7 @@ def import_bmad_stories(
     project_path: str | Path,
     dry_run: bool = False,
     epic_filter: Optional[int] = None,
+    config_defaults: Optional[dict] = None,
 ) -> ImportResult:
     """Import BMAD stories from sprint-status.yaml into Beads.
 
@@ -56,13 +57,15 @@ def import_bmad_stories(
     """
     project_path = Path(project_path).resolve()
     result = ImportResult()
+    defaults = config_defaults or {}
 
-    bmad = BMADAdapter(project_path)
+    bmad = BMADAdapter(project_path, sprint_status_paths=defaults.get("sprint_status_paths"))
     if not bmad.exists():
         result.errors.append(f"sprint-status.yaml not found in {project_path}")
         return result
 
-    beads = BeadsAdapter(project_path=str(project_path))
+    beads = BeadsAdapter(project_path=str(project_path),
+                         cli_timeout=defaults.get("cli_timeout", 30))
     if not beads.available():
         result.errors.append("bd CLI not available")
         return result

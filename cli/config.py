@@ -71,6 +71,24 @@ def write_config(project_path: Path, config: dict):
     config_file.write_text(yaml.dump(config, default_flow_style=False, sort_keys=False))
 
 
+def get_defaults(config: dict) -> dict:
+    """Extract defaults section from config, with fallback values."""
+    defaults = config.get("defaults", {})
+    return {
+        "cli_timeout": defaults.get("cli_timeout", 30),
+        "git_timeout": defaults.get("git_timeout", 5),
+        "handoff_timeout": defaults.get("handoff_timeout", 15),
+        "codeman_api_url": defaults.get("codeman_api_url", "http://localhost:3000"),
+        "codeman_timeout": defaults.get("codeman_timeout", 15),
+        "status_list_limit": defaults.get("status_list_limit", 20),
+        "sprint_status_paths": defaults.get("sprint_status_paths", [
+            "_bmad-output/implementation-artifacts/sprint-status.yaml",
+            "_bmad-output/sprint-status.yaml",
+            "sprint-status.yaml",
+        ]),
+    }
+
+
 def get_trackers(config: dict) -> list:
     """Extract issue_trackers list from config."""
     return config.get("issue_trackers", [])

@@ -31,6 +31,13 @@ EPIC_STATUSES = {"backlog", "in-progress", "done"}
 STORY_STATUSES = {"backlog", "ready-for-dev", "in-progress", "review", "done"}
 
 
+DEFAULT_SPRINT_STATUS_PATHS = [
+    "_bmad-output/implementation-artifacts/sprint-status.yaml",
+    "_bmad-output/sprint-status.yaml",
+    "sprint-status.yaml",
+]
+
+
 class BMADAdapter:
     """Adapter for BMAD sprint-status.yaml — reads/writes story/epic status.
 
@@ -40,9 +47,11 @@ class BMADAdapter:
         epic-N-retrospective: optional | done
     """
 
-    def __init__(self, project_path: str | Path):
+    def __init__(self, project_path: str | Path,
+                 sprint_status_paths: Optional[list[str]] = None):
         self.project_path = Path(project_path).resolve()
         self._status_path: Optional[Path] = None
+        self._search_paths = sprint_status_paths or DEFAULT_SPRINT_STATUS_PATHS
 
     @property
     def status_path(self) -> Path:
@@ -50,12 +59,8 @@ class BMADAdapter:
         if self._status_path and self._status_path.exists():
             return self._status_path
 
-        # Check standard locations
-        candidates = [
-            self.project_path / "_bmad-output" / "implementation-artifacts" / "sprint-status.yaml",
-            self.project_path / "_bmad-output" / "sprint-status.yaml",
-            self.project_path / "sprint-status.yaml",
-        ]
+        # Check configured locations
+        candidates = [self.project_path / p for p in self._search_paths]
         for p in candidates:
             if p.exists():
                 self._status_path = p

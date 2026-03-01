@@ -9,13 +9,13 @@ from pathlib import Path
 
 from .config import (
     find_project_path, find_project_slug, read_config, write_config,
-    get_trackers, get_default_tracker, get_tracker_by_name,
+    get_trackers, get_default_tracker, get_tracker_by_name, get_defaults,
     detect_repo_type, init_config, _iter_atlas_projects,
 )
 from .routing import evaluate_rules, priority_to_number
 from .adapters import check_adapter, create_issue, list_issues
 from .importer import import_bmad_stories
-from .sync import sync_statuses
+from .sync import sync_statuses, check_desync
 
 
 def out(data: dict, fmt: str = "json"):
@@ -493,10 +493,27 @@ def _gather_git_info(project_path: Path) -> dict:
 def cmd_sync(args):
     """Sync BMAD ↔ Beads statuses."""
     project_path = find_project_path(args.project)
+    config = read_config(project_path) or {}
+    defaults = get_defaults(config)
+
+    if args.check:
+        result = check_desync(project_path, config_defaults=defaults)
+        data = {"status": "ok", "action": "check", **result.to_dict()}
+        if result.desynced:
+            data["status"] = "desynced"
+        if result.errors:
+            data["status"] = "error"
+        out(data, args.format)
+        if result.desynced or result.errors:
+            sys.exit(1)
+        return
+
     result = sync_statuses(
         project_path=project_path,
         direction=args.direction,
         dry_run=args.dry_run,
+        alert_conflicts=args.alert_conflicts,
+        config_defaults=defaults,
     )
     data = {"status": "ok", "action": "sync", **result.to_dict()}
     if result.errors:
@@ -509,10 +526,13 @@ def cmd_sync(args):
 def cmd_import(args):
     """Import BMAD stories into Beads."""
     project_path = find_project_path(args.project)
+    config = read_config(project_path) or {}
+    defaults = get_defaults(config)
     result = import_bmad_stories(
         project_path=project_path,
         dry_run=args.dry_run,
         epic_filter=args.epic,
+        config_defaults=defaults,
     )
     data = {"status": "ok", "action": "import", **result.to_dict()}
     if result.errors:
@@ -591,6 +611,9 @@ def main():
     p_sync.add_argument("--direction", choices=["auto", "bmad-to-beads", "beads-to-bmad"],
                         default="auto", help="Sync direction")
     p_sync.add_argument("--dry-run", action="store_true", help="Preview without making changes")
+    p_sync.add_argument("--check", action="store_true", help="Check for desyncs without changing anything")
+    p_sync.add_argument("--alert-conflicts", action="store_true",
+                        help="Create Beads issues for detected sync conflicts")
 
     args = parser.parse_args()
 

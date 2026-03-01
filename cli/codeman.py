@@ -74,9 +74,11 @@ class SessionStatus:
 class CodemanAdapter:
     """Query Codeman Ralph Loop for session and plan task status."""
 
-    def __init__(self, api_url: str = "http://localhost:3000", password: str = ""):
+    def __init__(self, api_url: str = "http://localhost:3000", password: str = "",
+                 timeout: int = 15):
         self.api_url = api_url.rstrip("/")
         self.password = password
+        self.timeout = timeout
 
     def _headers(self) -> dict:
         headers = {"Content-Type": "application/json"}
@@ -89,7 +91,7 @@ class CodemanAdapter:
         url = f"{self.api_url}{path}"
         req = urllib.request.Request(url, headers=self._headers())
         try:
-            with urllib.request.urlopen(req, timeout=15) as resp:
+            with urllib.request.urlopen(req, timeout=self.timeout) as resp:
                 return json.loads(resp.read().decode())
         except urllib.error.HTTPError as e:
             logger.warning("Codeman API error %d: %s", e.code, e.read().decode())

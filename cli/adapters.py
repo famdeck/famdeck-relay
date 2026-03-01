@@ -21,13 +21,14 @@ class BeadsAdapter:
     (spec_id, external_ref, parent, metadata JSON, labels, deps).
     """
 
-    def __init__(self, project_path: Optional[str | Path] = None):
+    def __init__(self, project_path: Optional[str | Path] = None, cli_timeout: int = 30):
         self.project_path = str(project_path) if project_path else None
+        self.cli_timeout = cli_timeout
 
     def _bd(self, *args: str, silent: bool = False) -> dict:
         """Run bd CLI command."""
         cmd = ["bd"] + list(args)
-        kwargs: dict = {"capture_output": True, "text": True, "timeout": 30}
+        kwargs: dict = {"capture_output": True, "text": True, "timeout": self.cli_timeout}
         if self.project_path:
             kwargs["cwd"] = self.project_path
         return _run_cli(cmd, "beads", **kwargs)
@@ -368,7 +369,9 @@ def _jira_list(tracker, status, limit):
 
 def _run_cli(cmd: list, adapter_name: str, **subprocess_kwargs) -> dict:
     """Run a CLI command and return structured result."""
-    kwargs = {"capture_output": True, "text": True, "timeout": 30}
+    kwargs = {"capture_output": True, "text": True}
+    if "timeout" not in subprocess_kwargs:
+        kwargs["timeout"] = 30
     kwargs.update(subprocess_kwargs)
     try:
         result = subprocess.run(cmd, **kwargs)
