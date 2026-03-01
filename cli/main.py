@@ -15,6 +15,7 @@ from .config import (
 from .routing import evaluate_rules, priority_to_number
 from .adapters import check_adapter, create_issue, list_issues
 from .importer import import_bmad_stories
+from .sync import sync_statuses
 
 
 def out(data: dict, fmt: str = "json"):
@@ -489,6 +490,22 @@ def _gather_git_info(project_path: Path) -> dict:
     }
 
 
+def cmd_sync(args):
+    """Sync BMAD ↔ Beads statuses."""
+    project_path = find_project_path(args.project)
+    result = sync_statuses(
+        project_path=project_path,
+        direction=args.direction,
+        dry_run=args.dry_run,
+    )
+    data = {"status": "ok", "action": "sync", **result.to_dict()}
+    if result.errors:
+        data["status"] = "partial" if result.bmad_to_beads or result.beads_to_bmad else "error"
+    if result.conflicts:
+        data["status"] = "conflicts"
+    out(data, args.format)
+
+
 def cmd_import(args):
     """Import BMAD stories into Beads."""
     project_path = find_project_path(args.project)
@@ -569,6 +586,12 @@ def main():
     p_import.add_argument("--dry-run", action="store_true", help="Preview without creating issues")
     p_import.add_argument("--epic", type=int, help="Only import stories from this epic")
 
+    # sync (BMAD ↔ Beads)
+    p_sync = sub.add_parser("sync", help="Sync BMAD ↔ Beads statuses")
+    p_sync.add_argument("--direction", choices=["auto", "bmad-to-beads", "beads-to-bmad"],
+                        default="auto", help="Sync direction")
+    p_sync.add_argument("--dry-run", action="store_true", help="Preview without making changes")
+
     args = parser.parse_args()
 
     if not args.command:
@@ -584,6 +607,7 @@ def main():
         "handoff": cmd_handoff,
         "pickup": cmd_pickup,
         "import": cmd_import,
+        "sync": cmd_sync,
     }
     handlers[args.command](args)
 
