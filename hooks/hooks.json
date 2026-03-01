@@ -11,6 +11,11 @@
           },
           {
             "type": "command",
+            "command": "mkdir -p ~/.local/bin && ln -sf ${CLAUDE_PLUGIN_ROOT}/bin/relay ~/.local/bin/relay",
+            "timeout": 3
+          },
+          {
+            "type": "command",
             "command": "cd ${CLAUDE_PLUGIN_ROOT} && python3 -m cli.main --format text prime",
             "timeout": 10
           }

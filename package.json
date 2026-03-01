@@ -1,6 +1,6 @@
 {
   "name": "famdeck-relay",
-  "version": "0.4.0",
+  "version": "0.6.0",
   "type": "module",
   "description": "Famdeck Relay - issue routing, handoffs, messaging for OpenClaw",
   "license": "MIT",
@@ -9,7 +9,7 @@
     "url": "https://github.com/famdeck/famdeck-relay.git"
   },
   "keywords": ["openclaw", "openclaw-plugin", "famdeck", "issue-routing", "handoffs", "agent-workflows"],
-  "files": ["index.ts", "openclaw.plugin.json", "openclaw-skills", "cli", "bin", "LICENSE"],
+  "files": ["index.ts", "openclaw.plugin.json", "openclaw-skills", "cli", "bin", "mcp-server", "LICENSE"],
   "openclaw": { "extensions": ["./index.ts"] },
   "peerDependencies": { "openclaw": "*" }
 }

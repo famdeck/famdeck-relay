@@ -2,14 +2,34 @@
 name: trackers
 description: Manage per-project issue tracker configuration — show, initialize, add, or remove trackers in .claude/relay.yaml. Use when setting up relay for a project, viewing tracker config, adding new trackers, or managing routing rules.
 argument-hint: "[show|init|add|remove <name>] [--project <slug>]"
-allowed-tools: "Bash(relay:*)"
+allowed-tools: "ToolSearch,Bash(relay:*)"
 ---
 
 # Relay Trackers
 
-Manage tracker configuration via the `relay` CLI.
+Manage tracker configuration.
 
-## Commands
+## Primary: MCP tool
+
+Call the `trackers` MCP tool directly:
+
+```
+trackers(
+  action="show",         # show|init|add|remove
+  tracker_type="github", # github|gitlab|jira|beads|auto (for init/add)
+  name="NAME",           # tracker name (for add/remove)
+  repo="owner/repo",     # GitHub repo (for add --type github)
+  project_id="grp/proj", # GitLab project (for add --type gitlab)
+  project_key="PROJ",    # Jira key (for add --type jira)
+  set_default=false,     # make default (for add)
+  no_beads=false,        # skip beads (for init)
+  project="SLUG"         # optional: atlas project slug
+)
+```
+
+Load it via ToolSearch if not already available: search for `trackers`.
+
+## Fallback: CLI
 
 **Show** (default):
 ```bash
