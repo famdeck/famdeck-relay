@@ -195,7 +195,8 @@ def check_adapter(tracker_type: str) -> dict:
 
 
 def create_issue(tracker: dict, title: str, body: str, issue_type: str,
-                 priority: str, labels: list, assignee: Optional[str] = None) -> dict:
+                 priority: str, labels: list, assignee: Optional[str] = None,
+                 project_path: Optional[Path] = None) -> dict:
     """Create an issue via the appropriate adapter.
 
     Returns:
@@ -208,7 +209,8 @@ def create_issue(tracker: dict, title: str, body: str, issue_type: str,
     if adapter_type == "github":
         return _github_create(tracker, title, body, issue_type, priority, labels, assignee)
     elif adapter_type == "beads":
-        return _beads_create(tracker, title, body, issue_type, priority, labels, assignee)
+        return _beads_create(tracker, title, body, issue_type, priority, labels, assignee,
+                             project_path=project_path)
     elif adapter_type == "gitlab":
         return _gitlab_create(tracker, title, body, issue_type, priority, labels, assignee)
     elif adapter_type == "jira":
@@ -217,14 +219,15 @@ def create_issue(tracker: dict, title: str, body: str, issue_type: str,
         return {"status": "error", "message": f"Unknown adapter type: {adapter_type}"}
 
 
-def list_issues(tracker: dict, status: str = "open", limit: int = 20) -> dict:
+def list_issues(tracker: dict, status: str = "open", limit: int = 20,
+                project_path: Optional[Path] = None) -> dict:
     """List issues from a tracker."""
     adapter_type = tracker["type"]
 
     if adapter_type == "github":
         return _github_list(tracker, status, limit)
     elif adapter_type == "beads":
-        return _beads_list(tracker, status, limit)
+        return _beads_list(tracker, status, limit, project_path=project_path)
     elif adapter_type == "gitlab":
         return _gitlab_list(tracker, status, limit)
     elif adapter_type == "jira":
@@ -266,21 +269,28 @@ def _github_list(tracker, status, limit):
 
 # --- Beads adapter (bd CLI) — legacy functions ---
 
-def _beads_create(tracker, title, body, issue_type, priority, labels, assignee):
+def _beads_create(tracker, title, body, issue_type, priority, labels, assignee,
+                  project_path: Optional[Path] = None):
     pri_num = priority_to_number(priority)
     cmd = ["bd", "create", title, "--type", issue_type, "--priority", str(pri_num)]
     if body:
         cmd.extend(["--description", body])
     for label in labels:
         cmd.extend(["--label", label])
-    return _run_cli(cmd, "beads")
+    kwargs = {}
+    if project_path:
+        kwargs["cwd"] = str(project_path)
+    return _run_cli(cmd, "beads", **kwargs)
 
 
-def _beads_list(tracker, status, limit):
+def _beads_list(tracker, status, limit, project_path: Optional[Path] = None):
     cmd = ["bd", "list"]
     if status and status != "all":
         cmd.extend(["--status", status])
-    result = _run_cli(cmd, "beads")
+    kwargs = {}
+    if project_path:
+        kwargs["cwd"] = str(project_path)
+    result = _run_cli(cmd, "beads", **kwargs)
     if result["status"] == "ok":
         result["issues"] = result.get("stdout", "")
     return result

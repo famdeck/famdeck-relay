@@ -128,18 +128,19 @@ def issue(
         priority=priority,
         labels=merged_labels,
         assignee=merged_assignee,
+        project_path=project_path,
     )
     result["tracker_name"] = target["name"]
     result["tracker_type"] = target["type"]
 
     # Beads cross-reference (if created in non-beads tracker)
     if result.get("status") == "ok" and target["type"] != "beads" and not no_beads:
-        _maybe_beads_xref(config, title, result, target)
+        _maybe_beads_xref(config, title, result, target, project_path=project_path)
 
     return _result(result)
 
 
-def _maybe_beads_xref(config, title, result, source_tracker):
+def _maybe_beads_xref(config, title, result, source_tracker, project_path=None):
     """Create beads cross-reference issue if beads tracker is configured."""
     import shutil
     import subprocess
@@ -158,10 +159,13 @@ def _maybe_beads_xref(config, title, result, source_tracker):
     issue_ref = result.get("stdout", result.get("id", "unknown"))
     xref_body = f"Tracked in {source_tracker['name']}: {issue_ref}"
     try:
+        kwargs = {"capture_output": True, "text": True, "timeout": 15}
+        if project_path:
+            kwargs["cwd"] = str(project_path)
         subprocess.run(
             ["bd", "create", f"External: {title}", "--type", "task",
              "--description", xref_body, "--label", "external-ref"],
-            capture_output=True, text=True, timeout=15,
+            **kwargs,
         )
         result["beads_xref"] = True
     except Exception:
@@ -279,7 +283,7 @@ def status(
                 })
                 continue
 
-            result = list_issues(t, status=status, limit=limit)
+            result = list_issues(t, status=status, limit=limit, project_path=path)
             trackers_data.append({
                 "name": t["name"],
                 "type": t["type"],
