@@ -7,7 +7,6 @@
   },
   "repository": "https://github.com/famdeck/famdeck-relay",
   "agents": [
-    "./agents/router.md",
     "./agents/context-gatherer.md",
     "./agents/coordinator.md"
   ]

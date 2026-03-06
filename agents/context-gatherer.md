@@ -1,6 +1,6 @@
 ---
 name: context-gatherer
-description: Gathers work context for handoffs — git branch state, uncommitted changes, active beads issues, decisions made, and next steps. Use when switching context, delegating work, saving progress, or the user says "handoff".
+description: Gathers work context and creates handoffs — git branch state, uncommitted changes, active beads issues, decisions made, and next steps. Use when switching context, delegating work, saving progress, or the user says "handoff".
 model: haiku
 tools:
   - Bash
@@ -8,10 +8,10 @@ tools:
   - Grep
   - Glob
   - ToolSearch
-maxTurns: 8
+maxTurns: 10
 ---
 
-# Context Gatherer Agent
+# Context Gatherer & Handoff Agent
 
 You autonomously collect context about current work and create a handoff issue via relay.
 
@@ -50,7 +50,7 @@ You autonomously collect context about current work and create a handoff issue v
      instructions="<next steps and notes>"
    )
    ```
-   Load via ToolSearch: search for `handoff`.
+   Load via ToolSearch: search for `+relay handoff`.
 
    Fallback to CLI if MCP unavailable:
    ```bash
@@ -58,6 +58,13 @@ You autonomously collect context about current work and create a handoff issue v
    ```
 
 6. **Report** the handoff issue ID back.
+
+## Enriching the Handoff
+
+If no summary is provided in the prompt, generate one from gathered context:
+- What was the objective?
+- Key decisions made
+- What's left to do
 
 ## Output
 
