@@ -1,0 +1,8 @@
+{
+  "skill_name": "bmad-import",
+  "evals": [
+    {"id": 0, "eval_name": "eval-full-import", "prompt": "Import BMAD stories into Beads for the project at /tmp/test-bmad-import. Show me a dry-run plan first.", "assertions": [{"text": "Reads sprint-status.yaml to discover stories"}, {"text": "Shows dry-run plan before applying"}, {"text": "Identifies 4 stories across 2 epics"}, {"text": "Detects dependency: 1-2 depends on 1-1, 2-2 depends on 2-1"}, {"text": "Would create Beads issues with bd create"}]},
+    {"id": 1, "eval_name": "eval-no-plan", "prompt": "Import BMAD stories into Beads for the project at /tmp/test-bmad-no-plan.", "assertions": [{"text": "Reports no BMAD artifacts found"}, {"text": "Does not create any issues"}]},
+    {"id": 2, "eval_name": "eval-partial-import", "prompt": "Import BMAD stories into Beads for /tmp/test-bmad-partial. Some stories are already tracked.", "assertions": [{"text": "Detects already-imported story 1-1 (PT-001)"}, {"text": "Plans to import only story 1-2 (not duplicate 1-1)"}, {"text": "Sets up dependency from new 1-2 issue to existing PT-001"}]}
+  ]
+}
