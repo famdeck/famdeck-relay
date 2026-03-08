@@ -1,0 +1,167 @@
+{
+  "metadata": {
+    "skill_name": "messaging",
+    "skill_path": "/Users/ivintik/dev/personal/tools/famdeck-relay/skills/messaging",
+    "executor_model": "claude-sonnet-4-6",
+    "analyzer_model": "claude-sonnet-4-6",
+    "timestamp": "2026-03-08T16:10:00Z",
+    "evals_run": ["check-inbox", "send-message", "coordinate-agents"],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "check-inbox",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "time_seconds": 73.1,
+        "tokens": 27448,
+        "tool_calls": 19,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "uses-toolsearch-for-agent-mail", "passed": true, "evidence": "Used ToolSearch with query '+agent-mail fetch_inbox'"},
+        {"text": "calls-fetch-inbox", "passed": true, "evidence": "Called mcp__agent-mail__fetch_inbox for PinkOtter"},
+        {"text": "no-invented-cli-command", "passed": true, "evidence": "Used MCP tools exclusively"}
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "check-inbox",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "time_seconds": 69.3,
+        "tokens": 20800,
+        "tool_calls": 20,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "uses-toolsearch-for-agent-mail", "passed": true, "evidence": "Loaded mcp__agent-mail__fetch_inbox tool"},
+        {"text": "calls-fetch-inbox", "passed": true, "evidence": "Fetched inbox for CoralGlacier and BluePond, found real messages"},
+        {"text": "no-invented-cli-command", "passed": true, "evidence": "Used MCP tools directly"}
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "send-message",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 144.4,
+        "tokens": 29242,
+        "tool_calls": 24,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "uses-toolsearch-for-agent-mail", "passed": true, "evidence": "Loaded multiple agent-mail tools via ToolSearch"},
+        {"text": "calls-send-message", "passed": true, "evidence": "Called mcp__agent-mail__send_message, message ID 3 delivered"},
+        {"text": "addresses-digital-collector", "passed": true, "evidence": "Ensured and used /Users/ivintik/dev/digital/digital-collector project"},
+        {"text": "no-invented-cli-command", "passed": true, "evidence": "MCP tools only"}
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "send-message",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.75,
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "time_seconds": 215.2,
+        "tokens": 42908,
+        "tool_calls": 38,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "uses-toolsearch-for-agent-mail", "passed": true, "evidence": "Loaded send_message tool via ToolSearch"},
+        {"text": "calls-send-message", "passed": false, "evidence": "Blocked — no recipients registered; did not attempt to create project+recipient to unblock"},
+        {"text": "addresses-digital-collector", "passed": true, "evidence": "Correctly identified digital-collector project"},
+        {"text": "no-invented-cli-command", "passed": true, "evidence": "MCP tools only"}
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "coordinate-agents",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 81.9,
+        "tokens": 31740,
+        "tool_calls": 21,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "uses-toolsearch-for-agent-mail", "passed": true, "evidence": "Loaded multiple agent-mail tools via ToolSearch"},
+        {"text": "checks-inbox-before-sending", "passed": true, "evidence": "Called fetch_inbox (step 6), found TealFinch message, acknowledged it before replying"},
+        {"text": "mentions-skills-init", "passed": true, "evidence": "Reply explicitly asks TealFinch about skills/init scope"},
+        {"text": "no-invented-cli-command", "passed": true, "evidence": "MCP tools only"}
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "coordinate-agents",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.75,
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "time_seconds": 49.7,
+        "tokens": 24855,
+        "tool_calls": 10,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "uses-toolsearch-for-agent-mail", "passed": true, "evidence": "Loaded agent-mail tools via ToolSearch"},
+        {"text": "checks-inbox-before-sending", "passed": false, "evidence": "Went straight to register+broadcast without checking inbox first"},
+        {"text": "mentions-skills-init", "passed": true, "evidence": "Broadcast message mentions skills/init"},
+        {"text": "no-invented-cli-command", "passed": true, "evidence": "MCP tools only"}
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {"mean": 1.0, "stddev": 0.0, "min": 1.0, "max": 1.0},
+      "time_seconds": {"mean": 99.8, "stddev": 37.7, "min": 73.1, "max": 144.4},
+      "tokens": {"mean": 29477, "stddev": 1770, "min": 27448, "max": 31740}
+    },
+    "without_skill": {
+      "pass_rate": {"mean": 0.83, "stddev": 0.14, "min": 0.75, "max": 1.0},
+      "time_seconds": {"mean": 111.4, "stddev": 84.7, "min": 49.7, "max": 215.2},
+      "tokens": {"mean": 29521, "stddev": 11397, "min": 20800, "max": 42908}
+    },
+    "delta": {
+      "pass_rate": "+0.17",
+      "time_seconds": "-11.6",
+      "tokens": "-44"
+    }
+  },
+  "notes": [
+    "Assertion 'uses-toolsearch-for-agent-mail' passes 100% in both configurations — not discriminating since Agent Mail MCP tools are available regardless",
+    "Assertion 'no-invented-cli-command' passes 100% in both — agents don't invent relay messaging CLI even without the skill",
+    "Key discriminating assertions: 'checks-inbox-before-sending' (eval 3) and 'calls-send-message' (eval 2) — skill wins on both",
+    "Without-skill on send-message used 38 tool calls vs 24 with skill, and still failed to send — skill correctly guides recipient setup which is non-obvious",
+    "With-skill on check-inbox registered a NEW agent (empty inbox) instead of discovering existing ones — skill is missing agent identity discovery guidance"
+  ]
+}

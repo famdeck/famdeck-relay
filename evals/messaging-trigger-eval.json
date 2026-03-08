@@ -1,0 +1,22 @@
+[
+  {"query": "check my agent mail inbox, I think there are some messages from the other agent working on the auth service", "should_trigger": true},
+  {"query": "send a message to the digital-collector project team — relay config has changed, please restart the service", "should_trigger": true},
+  {"query": "I'm about to start refactoring the collector module, let the other agents on this project know so we don't conflict", "should_trigger": true},
+  {"query": "any new messages from the other agent? we were coordinating on the schema migration", "should_trigger": true},
+  {"query": "notify the famdeck-atlas project that I've finished pushing the init skill changes", "should_trigger": true},
+  {"query": "can you check if bluePond sent me anything? we were in the middle of a file reservation handoff", "should_trigger": true},
+  {"query": "ack message 12, I've seen the coordination notice about skills/init", "should_trigger": true},
+  {"query": "search my agent mail for messages about the relay config update", "should_trigger": true},
+  {"query": "what agents are registered in the famdeck-relay project right now?", "should_trigger": true},
+  {"query": "broadcast to all agents in this project that the beads schema has been bumped to v2", "should_trigger": true},
+  {"query": "save my progress before I switch to another task — I've been working on the parser refactor", "should_trigger": false},
+  {"query": "file a bug in the famdeck-atlas project — the explorer agent fails when Atlas registry is empty", "should_trigger": false},
+  {"query": "show me what issues are open across all my projects", "should_trigger": false},
+  {"query": "create a relay handoff for the work I did on the session hook today", "should_trigger": false},
+  {"query": "I need to coordinate with the other developer on this PR — can you help me draft a comment?", "should_trigger": false},
+  {"query": "set up relay for this project, I want to connect it to my gitlab tracker", "should_trigger": false},
+  {"query": "check what work is waiting for me, I'm picking up where I left off from yesterday", "should_trigger": false},
+  {"query": "send an email to the team about the deployment", "should_trigger": false},
+  {"query": "what's the status of open issues in digital-collector?", "should_trigger": false},
+  {"query": "I want to coordinate the parallel work on the new feature — can you help me divide up the tasks between me and the other dev?", "should_trigger": false}
+]

@@ -1,0 +1,21 @@
+{
+  "eval_id": 1,
+  "run": "with_skill",
+  "expectations": [
+    {
+      "text": "uses-toolsearch-for-agent-mail",
+      "passed": true,
+      "evidence": "Used ToolSearch with query '+agent-mail fetch_inbox' to load mcp__agent-mail__fetch_inbox"
+    },
+    {
+      "text": "calls-fetch-inbox",
+      "passed": true,
+      "evidence": "Called mcp__agent-mail__fetch_inbox for agent PinkOtter"
+    },
+    {
+      "text": "no-invented-cli-command",
+      "passed": true,
+      "evidence": "No relay messaging CLI command invented; used MCP tools exclusively"
+    }
+  ]
+}

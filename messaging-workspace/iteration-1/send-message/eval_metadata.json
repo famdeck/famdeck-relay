@@ -1,0 +1,6 @@
+{
+  "eval_id": 2,
+  "eval_name": "send-message",
+  "prompt": "send a message to the digital-collector project that the relay config has been updated and they should restart",
+  "assertions": []
+}

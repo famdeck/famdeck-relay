@@ -1,0 +1,57 @@
+## Task: Send message to digital-collector about relay config update
+
+### Steps taken
+
+1. Read skill at /Users/ivintik/dev/personal/tools/famdeck-relay/skills/messaging/SKILL.md
+   - Skill uses Agent Mail MCP tools
+   - Key tools: ensure_project, register_agent, send_message with broadcast=true
+
+2. Checked Atlas registry (~/.claude/atlas/registry.yaml) for digital-collector path
+   - digital-collector not in registry
+   - Used path from CLAUDE.md: /Users/ivintik/dev/digital/digital-collector
+
+3. Called mcp__agent-mail__ensure_project for both projects:
+   - /Users/ivintik/dev/personal/tools/famdeck-atlas → id=36, slug=users-ivintik-dev-personal-tools-famdeck-atlas
+   - /Users/ivintik/dev/digital/digital-collector → id=37, slug=users-ivintik-dev-digital-digital-collector
+
+4. Called mcp__agent-mail__register_agent in famdeck-atlas project:
+   - Agent name: FrostyHarbor (auto-generated)
+
+5. Attempted send_message with sender=FrostyHarbor in digital-collector project
+   - Failed: agent must be registered in the target project to send
+
+6. Called mcp__agent-mail__register_agent in digital-collector project:
+   - Agent name: FoggyPeak (auto-generated)
+
+7. Called mcp__agent-mail__send_message with broadcast=true:
+   - project_key: /Users/ivintik/dev/digital/digital-collector
+   - sender_name: FoggyPeak
+   - broadcast: true
+   - subject: "Relay config updated — please restart"
+   - importance: high
+
+### Result
+
+Message delivered successfully.
+
+Delivery details:
+- message id: 8
+- project: /Users/ivintik/dev/digital/digital-collector
+- from: FoggyPeak
+- to: ["RainyHarbor", "CoralGlacier"] (broadcast expanded to 2 registered agents)
+- subject: "Relay config updated — please restart"
+- importance: high
+- created_ts: 2026-03-08T16:22:32.299468+00:00
+
+Message body:
+> Hi,
+>
+> The relay configuration has been updated. Please restart the digital-collector service to pick up the new configuration.
+>
+> This notification is sent from the famdeck-atlas project.
+
+### Notes
+
+- The digital-collector project was not in the Atlas registry but was found via CLAUDE.md architecture docs
+- Two agents were already registered in digital-collector (RainyHarbor, CoralGlacier) — message was broadcast to both
+- Agent FoggyPeak was registered in digital-collector as the sender identity

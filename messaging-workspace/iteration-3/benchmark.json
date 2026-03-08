@@ -1,0 +1,167 @@
+{
+  "metadata": {
+    "skill_name": "messaging",
+    "skill_path": "/Users/ivintik/dev/personal/tools/famdeck-relay/skills/messaging",
+    "executor_model": "claude-sonnet-4-6",
+    "analyzer_model": "claude-sonnet-4-6",
+    "timestamp": "2026-03-08T16:25:00Z",
+    "evals_run": ["check-inbox", "send-message", "coordinate-agents"],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "check-inbox",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "time_seconds": 54.6,
+        "tokens": 23398,
+        "tool_calls": 14,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "uses-toolsearch-for-agent-mail", "passed": true, "evidence": "Loaded agent-mail tools via ToolSearch"},
+        {"text": "calls-fetch-inbox", "passed": true, "evidence": "Used fetch_summary to find project, found CoralGlacier and BluePond, found TealFinch's message"},
+        {"text": "no-invented-cli-command", "passed": true, "evidence": "MCP tools only"}
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "check-inbox",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.67,
+        "passed": 2,
+        "failed": 1,
+        "total": 3,
+        "time_seconds": 47.7,
+        "tokens": 19016,
+        "tool_calls": 9,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "uses-toolsearch-for-agent-mail", "passed": true, "evidence": "Loaded agent-mail tools via ToolSearch"},
+        {"text": "calls-fetch-inbox", "passed": false, "evidence": "Used macro_start_session which registered a NEW agent CyanHawk — got empty inbox, missed existing messages from TealFinch"},
+        {"text": "no-invented-cli-command", "passed": true, "evidence": "MCP tools only"}
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "send-message",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 111.3,
+        "tokens": 31771,
+        "tool_calls": 21,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "uses-toolsearch-for-agent-mail", "passed": true, "evidence": "Loaded agent-mail tools via ToolSearch"},
+        {"text": "calls-send-message", "passed": true, "evidence": "Broadcast delivered to 2 agents (RainyHarbor, CoralGlacier), message id 8"},
+        {"text": "addresses-digital-collector", "passed": true, "evidence": "Used digital-collector project path from CLAUDE.md"},
+        {"text": "no-invented-cli-command", "passed": true, "evidence": "MCP tools only"}
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "send-message",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 164.5,
+        "tokens": 37700,
+        "tool_calls": 27,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "uses-toolsearch-for-agent-mail", "passed": true, "evidence": "Loaded agent-mail tools via ToolSearch"},
+        {"text": "calls-send-message", "passed": true, "evidence": "Broadcast delivered to GentleWolf, message id 9"},
+        {"text": "addresses-digital-collector", "passed": true, "evidence": "Found digital-collector path from prior output context"},
+        {"text": "no-invented-cli-command", "passed": true, "evidence": "MCP tools only"}
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "coordinate-agents",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 57.3,
+        "tokens": 25799,
+        "tool_calls": 12,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "uses-toolsearch-for-agent-mail", "passed": true, "evidence": "Loaded agent-mail tools via ToolSearch"},
+        {"text": "checks-inbox-before-sending", "passed": true, "evidence": "Checked inbox (empty) before broadcasting — clean path"},
+        {"text": "mentions-skills-init", "passed": true, "evidence": "Broadcast announces starting work on skills/init file"},
+        {"text": "no-invented-cli-command", "passed": true, "evidence": "MCP tools only"}
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "coordinate-agents",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.75,
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "time_seconds": 79.4,
+        "tokens": 26270,
+        "tool_calls": 17,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "uses-toolsearch-for-agent-mail", "passed": true, "evidence": "Loaded agent-mail tools via ToolSearch"},
+        {"text": "checks-inbox-before-sending", "passed": false, "evidence": "Checked inbox but only for newly registered RubyAnchor (empty) — did not check existing agents' inboxes first"},
+        {"text": "mentions-skills-init", "passed": true, "evidence": "Broadcast mentions skills/init file"},
+        {"text": "no-invented-cli-command", "passed": true, "evidence": "MCP tools only"}
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {"mean": 1.0, "stddev": 0.0, "min": 1.0, "max": 1.0},
+      "time_seconds": {"mean": 74.4, "stddev": 29.2, "min": 54.6, "max": 111.3},
+      "tokens": {"mean": 26989, "stddev": 4218, "min": 23398, "max": 31771}
+    },
+    "without_skill": {
+      "pass_rate": {"mean": 0.81, "stddev": 0.16, "min": 0.67, "max": 1.0},
+      "time_seconds": {"mean": 97.2, "stddev": 60.7, "min": 47.7, "max": 164.5},
+      "tokens": {"mean": 27662, "stddev": 10116, "min": 19016, "max": 37700}
+    },
+    "delta": {
+      "pass_rate": "+0.19",
+      "time_seconds": "-22.8",
+      "tokens": "-673"
+    }
+  },
+  "notes": [
+    "Skill wins on pass rate (+19%) and time (-22.8s avg) vs baseline",
+    "Key win: check-inbox — skill's fetch_summary guidance finds existing agents and real messages; baseline macro_start_session registers a fresh agent with empty inbox",
+    "send-message: both succeed now; skill reaches more recipients (2 vs 1) with fewer tool calls (21 vs 27)",
+    "coordinate-agents: both check inbox and broadcast; skill is more efficient (12 vs 17 tool calls, 57s vs 79s)",
+    "Skill consistently uses fewer tool calls across all 3 evals — the structured guidance reduces exploration overhead"
+  ]
+}

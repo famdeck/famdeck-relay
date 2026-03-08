@@ -1,0 +1,26 @@
+{
+  "eval_id": 3,
+  "run": "without_skill",
+  "expectations": [
+    {
+      "text": "uses-toolsearch-for-agent-mail",
+      "passed": true,
+      "evidence": "Loaded agent-mail tools via ToolSearch"
+    },
+    {
+      "text": "checks-inbox-before-sending",
+      "passed": false,
+      "evidence": "Did not check inbox before sending — went straight to register + broadcast without reading existing messages"
+    },
+    {
+      "text": "mentions-skills-init",
+      "passed": true,
+      "evidence": "Broadcast message mentions skills/init file"
+    },
+    {
+      "text": "no-invented-cli-command",
+      "passed": true,
+      "evidence": "Used MCP tools directly"
+    }
+  ]
+}

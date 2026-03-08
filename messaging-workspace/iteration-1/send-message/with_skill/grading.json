@@ -1,0 +1,26 @@
+{
+  "eval_id": 2,
+  "run": "with_skill",
+  "expectations": [
+    {
+      "text": "uses-toolsearch-for-agent-mail",
+      "passed": true,
+      "evidence": "Loaded multiple agent-mail tools via ToolSearch (send_message, macro_start_session, list_contacts, register_agent)"
+    },
+    {
+      "text": "calls-send-message",
+      "passed": true,
+      "evidence": "Called mcp__agent-mail__send_message and successfully delivered message ID 3"
+    },
+    {
+      "text": "addresses-digital-collector",
+      "passed": true,
+      "evidence": "Created project /Users/ivintik/dev/digital/digital-collector and sent message there"
+    },
+    {
+      "text": "no-invented-cli-command",
+      "passed": true,
+      "evidence": "Used MCP tools exclusively, no CLI invented"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+## Agent Mail Inbox Check — famdeck-atlas
+
+### Tools Called
+
+1. `ToolSearch` — loaded `mcp__agent-mail__fetch_inbox`
+2. `Read` — read skill file at `/Users/ivintik/dev/personal/tools/famdeck-relay/skills/messaging/SKILL.md`
+3. `ToolSearch` — loaded `mcp__agent-mail__fetch_summary`, `mcp__agent-mail__ensure_project`
+4. `mcp__agent-mail__ensure_project` — confirmed project at `/Users/ivintik/dev/personal/tools/famdeck-atlas` → slug: `users-ivintik-dev-personal-tools-famdeck-atlas`, project id: 36
+5. `mcp__agent-mail__fetch_inbox` (as CoralGlacier) — retrieved inbox
+6. `mcp__agent-mail__fetch_inbox` (as BluePond) — verified same message visible to both agents
+
+### Project Info
+
+- Project path: `/Users/ivintik/dev/personal/tools/famdeck-atlas`
+- Project slug: `users-ivintik-dev-personal-tools-famdeck-atlas`
+- Project ID: 36
+- Registered agents: CoralGlacier, BluePond
+
+### Inbox Contents
+
+| ID | From | Subject | Importance | Ack Required | Time |
+|----|------|---------|------------|--------------|------|
+| 1 | TealFinch | Starting work on skills/init file | normal | yes | 2026-03-08T15:59:52Z |
+
+### Message Body (ID: 1)
+
+**From:** TealFinch
+**Subject:** Starting work on skills/init file
+**Importance:** normal
+**Ack Required:** true
+**Thread:** none
+
+> Hi,
+>
+> Just a heads-up: I'm starting work on the `skills/init` file in the famdeck-atlas project.
+>
+> Please let me know if you're working on anything in that area so we can coordinate and avoid conflicts.
+>
+> — TealFinch
+
+### Notes
+
+- Message ID 1 has `ack_required: true` — this message needs acknowledgment via `mcp__agent-mail__acknowledge_message`
+- Both registered agents (CoralGlacier and BluePond) see the same single message
+- No other messages in the inbox

@@ -1,0 +1,21 @@
+{
+  "eval_id": 1,
+  "run": "without_skill",
+  "expectations": [
+    {
+      "text": "uses-toolsearch-for-agent-mail",
+      "passed": true,
+      "evidence": "Loaded mcp__agent-mail__fetch_inbox tool and used it"
+    },
+    {
+      "text": "calls-fetch-inbox",
+      "passed": true,
+      "evidence": "Called fetch_inbox for CoralGlacier and BluePond, found real messages"
+    },
+    {
+      "text": "no-invented-cli-command",
+      "passed": true,
+      "evidence": "Used MCP tools directly, no CLI invented"
+    }
+  ]
+}

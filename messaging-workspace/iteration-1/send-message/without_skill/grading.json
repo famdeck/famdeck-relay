@@ -1,0 +1,26 @@
+{
+  "eval_id": 2,
+  "run": "without_skill",
+  "expectations": [
+    {
+      "text": "uses-toolsearch-for-agent-mail",
+      "passed": true,
+      "evidence": "Loaded send_message tool via ToolSearch"
+    },
+    {
+      "text": "calls-send-message",
+      "passed": false,
+      "evidence": "Did not successfully call send_message — correctly blocked because no recipients in project, but didn't attempt to register recipients to unblock"
+    },
+    {
+      "text": "addresses-digital-collector",
+      "passed": true,
+      "evidence": "Correctly identified digital-collector project and explained why message couldn't be sent"
+    },
+    {
+      "text": "no-invented-cli-command",
+      "passed": true,
+      "evidence": "Used MCP tools, no CLI invented"
+    }
+  ]
+}

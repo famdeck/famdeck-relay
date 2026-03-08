@@ -1,0 +1,6 @@
+{
+  "eval_id": 1,
+  "eval_name": "check-inbox",
+  "prompt": "check my agent mail inbox",
+  "assertions": []
+}

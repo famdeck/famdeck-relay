@@ -1,0 +1,26 @@
+{
+  "eval_id": 3,
+  "run": "with_skill",
+  "expectations": [
+    {
+      "text": "uses-toolsearch-for-agent-mail",
+      "passed": true,
+      "evidence": "Loaded multiple agent-mail tools via ToolSearch before calling them"
+    },
+    {
+      "text": "checks-inbox-before-sending",
+      "passed": true,
+      "evidence": "Called fetch_inbox (step 6) before sending — found TealFinch's message about skills/init, acknowledged it, then replied"
+    },
+    {
+      "text": "mentions-skills-init",
+      "passed": true,
+      "evidence": "Reply explicitly mentions skills/init file and asks TealFinch to clarify scope to avoid conflicts"
+    },
+    {
+      "text": "no-invented-cli-command",
+      "passed": true,
+      "evidence": "Used MCP tools exclusively"
+    }
+  ]
+}

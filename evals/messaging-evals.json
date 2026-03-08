@@ -1,0 +1,73 @@
+{
+  "skill_name": "messaging",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "check my agent mail inbox",
+      "expected_output": "Loads Agent Mail MCP tool via ToolSearch and calls fetch_inbox, displays messages as a table",
+      "files": [],
+      "assertions": [
+        {
+          "name": "uses-toolsearch-for-agent-mail",
+          "description": "Response uses ToolSearch to load an Agent Mail MCP tool before calling it"
+        },
+        {
+          "name": "calls-fetch-inbox",
+          "description": "Response references fetch_inbox or mcp__agent-mail__fetch_inbox"
+        },
+        {
+          "name": "no-invented-cli-command",
+          "description": "Response does NOT invent a 'relay messaging' or 'relay inbox' CLI command that doesn't exist"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "send a message to the digital-collector project that the relay config has been updated and they should restart",
+      "expected_output": "Loads send_message MCP tool via ToolSearch and attempts to send; handles missing recipient gracefully",
+      "files": [],
+      "assertions": [
+        {
+          "name": "uses-toolsearch-for-agent-mail",
+          "description": "Response uses ToolSearch to load an Agent Mail MCP tool before calling it"
+        },
+        {
+          "name": "calls-send-message",
+          "description": "Response references send_message or mcp__agent-mail__send_message"
+        },
+        {
+          "name": "addresses-digital-collector",
+          "description": "Response targets digital-collector project in the message"
+        },
+        {
+          "name": "no-invented-cli-command",
+          "description": "Response does NOT invent a 'relay messaging' or 'relay send' CLI command"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I need to coordinate with the other agent working on famdeck-atlas — let them know I'm starting work on the skills/init file",
+      "expected_output": "Loads Agent Mail tools, checks inbox for existing coordination messages, sends coordination message about skills/init",
+      "files": [],
+      "assertions": [
+        {
+          "name": "uses-toolsearch-for-agent-mail",
+          "description": "Response uses ToolSearch to load an Agent Mail MCP tool before calling it"
+        },
+        {
+          "name": "checks-inbox-before-sending",
+          "description": "Response checks inbox first to see if there are existing coordination messages before sending"
+        },
+        {
+          "name": "mentions-skills-init",
+          "description": "Coordination message explicitly mentions skills/init file"
+        },
+        {
+          "name": "no-invented-cli-command",
+          "description": "Response does NOT invent a relay CLI messaging command"
+        }
+      ]
+    }
+  ]
+}
