@@ -1,6 +1,6 @@
 ---
 name: pickup
-description: Resume work from a handoff — lists pending handoffs or restores full context from a specific one. Trigger phrases — "pick up where I left off", "resume work", "what's waiting for me", "continue from handoff", "check pending handoffs", "what was I working on".
+description: Resume work from a handoff — list pending handoffs or restore full context from a specific one. Use when the user wants to continue where they left off, check what work is parked, or restore context from a previous session. Do NOT trigger for creating new handoffs (use relay:context-gatherer), checking issue status (use relay:status), or general session questions unrelated to a relay handoff.
 argument-hint: "[<issue_id>] [--list]"
 allowed-tools: "ToolSearch,Bash(relay:*)"
 ---

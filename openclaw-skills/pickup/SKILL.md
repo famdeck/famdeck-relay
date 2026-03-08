@@ -1,6 +1,6 @@
 ---
 name: pickup
-description: "Resume work from a handoff — lists pending handoffs or restores full context. Trigger phrases — 'pick up where I left off', 'resume work', 'what's waiting', 'continue from handoff', 'check pending handoffs'."
+description: "Resume work from a handoff — list pending handoffs or restore full context from a specific one. Use when continuing from a previous session or checking what work is parked. Do NOT use for creating new handoffs (use handoff) or routing issues (use relay)."
 metadata: {"openclaw":{"emoji":"📥","requires":{"bins":["bd"]}}}
 allowed-tools: "Bash(relay:*)"
 ---

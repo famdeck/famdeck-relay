@@ -1,6 +1,6 @@
 ---
 name: issue
-description: Create and route an issue to the right tracker (GitHub, GitLab, Jira, beads). Trigger phrases — "file a bug", "create issue", "log a task", "feature request", "report a problem", "open a ticket". PROACTIVE — trigger this automatically when you discover a bug, needed fix, or improvement in ANY project, especially one other than the current. Don't silently move on — file the issue so it gets tracked upstream. Use atlas to resolve project slugs.
+description: Create and route an issue to the correct tracker — GitHub, GitLab, Jira, or beads — based on the project's relay config. Use when the user wants to file a bug, log a task, request a feature, or report a problem. PROACTIVE — trigger automatically when you discover a bug or needed fix in any project, especially cross-project; do not silently move on. Do NOT trigger for checking what issues are open (use relay:status), configuring trackers (use relay:trackers), or creating handoffs.
 argument-hint: '"title" [--project <slug>] [--tracker <name>] [--type bug|task|feature|chore] [--priority critical|high|medium|low] [--labels <l1,l2>] [--assignee <user>] [--body <text>] [--no-beads]'
 allowed-tools: "Read,ToolSearch,Bash(relay:*),Bash(which:*)"
 ---

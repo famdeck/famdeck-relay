@@ -1,6 +1,6 @@
 ---
 name: messaging
-description: "Cross-project agent messaging via mcp_agent_mail. Send notifications, coordinate between agents, check inbox. Trigger phrases — 'send a message', 'check messages', 'notify another project', 'agent inbox', 'message the other agent'. For within-project context transfer use /handoff instead."
+description: "Send cross-project messages and check inbox via Agent Mail — coordinate between agents, send notifications, and read messages. Use when an agent needs to notify another project, check for incoming messages, or acknowledge messages. Do NOT use for within-project context transfer (use handoff) or issue tracking (use relay)."
 metadata: {"openclaw":{"emoji":"💬"}}
 ---
 

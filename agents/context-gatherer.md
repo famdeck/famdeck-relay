@@ -1,6 +1,6 @@
 ---
 name: context-gatherer
-description: Gathers work context and creates handoffs — git branch state, uncommitted changes, active beads issues, decisions made, and next steps. Use when switching context, delegating work, saving progress, or the user says "handoff".
+description: Gather work context and save it as a handoff — captures git branch state, uncommitted changes, active beads issues, decisions made, and next steps. Use when the user wants to save progress, switch context, delegate work to another session, or says "handoff". Do NOT use for picking up existing handoffs (use relay:pickup) or for checking issue status.
 model: haiku
 tools:
   - Bash

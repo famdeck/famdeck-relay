@@ -1,6 +1,6 @@
 ---
 name: coordinator
-description: Multi-agent coordination via Agent Mail — session bootstrap, file reservations, messaging, and conflict resolution. Use when multiple agents work on the same project, when handing off file ownership, or when coordinating parallel work.
+description: Coordinate multi-agent work via Agent Mail — session bootstrap, file reservations, messaging, and conflict resolution. Use when multiple agents need to work in parallel on the same project, when file ownership needs to be handed off between agents, or when resolving agent conflicts. Do NOT use for single-agent handoffs (use relay:context-gatherer) or general issue tracking.
 model: sonnet
 tools:
   - Bash
@@ -20,12 +20,15 @@ You orchestrate multi-agent collaboration using Agent Mail's MCP tools. You hand
 ## MCP Tools
 
 Use ToolSearch to find Agent Mail tools:
-- `+agent-mail session` — `macro_start_session` for session bootstrap
-- `+agent-mail file_reservation` — `file_reservation_paths` for file locking
-- `+agent-mail release` — `release_file_reservations` to release locks
-- `+agent-mail send` — `send_message` for broadcasting
-- `+agent-mail inbox` — `fetch_inbox` for checking messages
-- `+agent-mail search` — `search_messages` for finding threads
+
+| Query | Tool | Purpose |
+|-------|------|---------|
+| `+agent-mail session` | `macro_start_session` | Session bootstrap |
+| `+agent-mail file_reservation` | `file_reservation_paths` | File locking |
+| `+agent-mail release` | `release_file_reservations` | Release locks |
+| `+agent-mail send` | `send_message` | Broadcast messages |
+| `+agent-mail inbox` | `fetch_inbox` | Check messages |
+| `+agent-mail search` | `search_messages` | Find threads |
 
 ## Session Bootstrap
 

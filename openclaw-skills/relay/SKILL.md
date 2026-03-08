@@ -1,6 +1,6 @@
 ---
 name: relay
-description: "Cross-project issue routing — create issues, check status, manage trackers. Routes to GitHub, GitLab, Jira, or Beads based on .claude/relay.yaml config. Trigger phrases — 'file a bug', 'create issue', 'log a task', 'show issues', 'project status', 'configure trackers'. PROACTIVE — trigger when you discover bugs or needed fixes in any project."
+description: "Route issues and manage trackers across projects — create bugs, tasks, and features in GitHub, GitLab, Jira, or beads; check issue status; configure trackers. PROACTIVE — trigger when you discover bugs or needed fixes in any project, especially cross-project. Do NOT use for creating handoffs (use handoff), picking up work (use pickup), or agent messaging (use messaging)."
 metadata: {"openclaw":{"emoji":"🔀","requires":{"anyBins":["gh","bd"]}}}
 allowed-tools: "Read,Bash(relay:*),ToolSearch,Bash(which:*)"
 ---

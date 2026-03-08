@@ -1,6 +1,6 @@
 ---
 name: status
-description: Cross-project issue dashboard — unified view of issues across all configured trackers (GitHub, GitLab, Jira, beads). Trigger phrases — "show issues", "what's open", "issue dashboard", "project status", "review open work", "what needs attention".
+description: Show a unified issue dashboard across all configured trackers — GitHub, GitLab, Jira, beads. Use when the user wants to see what's open, review work across projects, or get a cross-tracker overview. Do NOT trigger for creating issues (use relay:issue), configuring trackers (use relay:trackers), or picking up handoffs (use relay:pickup).
 argument-hint: "[--all] [--project <slug>] [--tracker <name>] [--status open|closed|all] [--limit <n>]"
 allowed-tools: "ToolSearch,Bash(relay:*)"
 ---

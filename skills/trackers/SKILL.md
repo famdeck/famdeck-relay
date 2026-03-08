@@ -1,6 +1,6 @@
 ---
 name: trackers
-description: Manage per-project issue tracker configuration — show, initialize, add, or remove trackers in .claude/relay.yaml. Trigger phrases — "set up relay", "configure trackers", "add a tracker", "show tracker config", "remove tracker", "initialize relay".
+description: Manage per-project issue tracker configuration in .claude/relay.yaml — show, initialize, add, or remove trackers. Use when the user wants to set up relay for a project, connect GitHub, GitLab, Jira, or beads, view current tracker config, or remove a tracker. Do NOT trigger for creating issues (use relay:issue) or viewing issue status (use relay:status).
 argument-hint: "[show|init|add|remove <name>] [--project <slug>]"
 allowed-tools: "ToolSearch,Bash(relay:*)"
 ---

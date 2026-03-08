@@ -1,6 +1,6 @@
 ---
 name: handoff
-description: "Save current work context as a beads issue for later pickup — captures branch, decisions, next steps, active issues. Trigger phrases — 'save my progress', 'hand off work', 'I'm done for now', 'park this work', 'wrap up session', 'context dump'. Use proactively when a session is ending or switching to a different task."
+description: "Save current work context as a handoff for later pickup — captures branch, uncommitted changes, decisions, next steps, and active issues. Use when the session is ending, switching to a different task, or parking work. Trigger proactively when work is being paused. Do NOT use for picking up existing handoffs (use pickup) or cross-project issue routing (use relay)."
 metadata: {"openclaw":{"emoji":"📦","requires":{"bins":["bd"]}}}
 allowed-tools: "Bash(relay:*),Bash(bd:*),Bash(git:*)"
 ---
@@ -26,4 +26,4 @@ If no `--summary` provided, build one from session context:
 
 ## Output
 
-Report the created handoff ID and remind: `Pick up later with: /relay:pickup`
+Report the created handoff ID and remind: `Pick up later with: /pickup`
