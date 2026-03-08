@@ -1,6 +1,6 @@
 ---
 name: messaging
-description: "Send and receive cross-project messages via mcp_agent_mail. Use for notifying other projects, coordinating between agents, or checking incoming messages."
+description: "Cross-project agent messaging via mcp_agent_mail. Send notifications, coordinate between agents, check inbox. Trigger phrases — 'send a message', 'check messages', 'notify another project', 'agent inbox', 'message the other agent'. For within-project context transfer use /handoff instead."
 metadata: {"openclaw":{"emoji":"💬"}}
 ---
 
@@ -8,127 +8,32 @@ metadata: {"openclaw":{"emoji":"💬"}}
 
 Cross-project messaging using mcp_agent_mail MCP tools.
 
-## When to Use
-
-| Scenario | Use This Skill |
-|----------|---------------|
-| Notify another project about something | Yes |
-| Coordinate between agents in different repos | Yes |
-| Check incoming messages from other agents | Yes |
-| Save work context on current branch | No — use `/handoff` instead |
-| Delegate work within the same repo | No — use `/handoff` instead |
-
 ## Prerequisites
 
-mcp_agent_mail must be running (default: `http://localhost:8765`). Check health:
+mcp_agent_mail must be running (default: `http://localhost:8765`). Check: `curl -sf http://localhost:8765/health/liveness`. Report errors clearly if unavailable.
 
-```bash
-curl -sf http://localhost:8765/health/liveness
-```
+## Subcommands
 
-If unavailable, report the error clearly. Do not silently degrade.
+Parse `$ARGUMENTS` for:
 
-## Parse Arguments
+| Subcommand | Action |
+|---|---|
+| (none) / `inbox` | `fetch_inbox()` — display as table with ID, From, Subject, Thread, Time |
+| `send <to> <subject>` | `send_message(to, project_key, subject, body, thread_id?)` |
+| `ack <message_id>` | `acknowledge_message(message_id)` |
+| `thread <thread_id>` | `fetch_topic(thread_id)` |
+| `contacts` | `list_contacts()` |
+| `start` | `macro_start_session(agent_name, project_key)` — register + fetch inbox |
 
-Parse `$ARGUMENTS` for subcommand:
+## MCP tools
 
-- **No args or `inbox`**: Fetch and display inbox
-- **`send <to> <subject>`**: Send a message
-- **`ack <message_id>`**: Acknowledge a message
-- **`thread <thread_id>`**: View a thread
-- **`contacts`**: List known contacts
-- **`start`**: Initialize session (register + fetch)
+All accessed via `mcp__agent-mail__` prefix. Load via ToolSearch (e.g., `+agent-mail send_message`).
 
-## Subcommand: inbox (default)
-
-Fetch incoming messages using the `fetch_inbox` MCP tool.
-
-Display as:
-```
-Inbox (N messages):
-  ID          From            Subject                     Thread          Time
-  msg-abc     atlas-agent     Status: JWT done            feature-jwt     2m ago
-  msg-def     relay-agent     Handoff: cleanup needed     handoff-123     1h ago
-```
-
-## Subcommand: send
-
-Send a message using the `send_message` MCP tool:
-
-```
-send_message(
-  to="<agent-name>",
-  project_key="<path/to/project>",
-  subject="<subject>",
-  body="<body>",
-  thread_id="<optional-thread-id>"
-)
-```
-
-Messages use GitHub-Flavored Markdown for body content. Threading via `thread_id` groups related messages.
-
-If `--thread <id>` provided, use it. Otherwise generate from context (e.g., `feature-jwt-refresh`).
-
-## Subcommand: ack
-
-Mark a message as read/handled:
-
-```
-acknowledge_message(message_id="<id>")
-```
-
-## Subcommand: thread
-
-View all messages in a thread:
-
-```
-fetch_topic(thread_id="<id>")
-```
-
-## Subcommand: contacts
-
-List known agent contacts:
-
-```
-list_contacts()
-```
-
-## Subcommand: start
-
-Initialize a messaging session — registers the current agent and fetches inbox in one call:
-
-```
-macro_start_session(
-  agent_name="<agent-name>",
-  project_key="<project-path>"
-)
-```
-
-Atlas auto-registers projects with the mail server at session start (idempotent).
-
-## MCP Tools Reference
-
-| Tool | Purpose |
-|------|---------|
-| `send_message` | Send a message to an agent/project |
-| `fetch_inbox` | Read incoming messages |
-| `acknowledge_message` | Mark message as read/handled |
-| `ensure_project` | Register a project with the mail server |
-| `register_agent` | Register an agent identity |
-| `macro_start_session` | Bundled startup (register + fetch inbox) |
-| `fetch_topic` | Fetch all messages in a thread |
-| `list_contacts` | List known agent contacts |
-| `search_messages` | Search messages by query |
-
-All tools are accessed via the `mcp__agent-mail__` prefix. Use ToolSearch to load them before calling (e.g., `ToolSearch("+agent-mail send_message")`).
-
-## Server Configuration
-
-Default: `http://localhost:8765`. Override with `AGENT_MAIL_URL` env var.
+Available: `send_message`, `fetch_inbox`, `acknowledge_message`, `ensure_project`, `register_agent`, `macro_start_session`, `fetch_topic`, `list_contacts`, `search_messages`.
 
 ## Rules
 
-- Always check mail server health before operations
-- Use thread_id for related messages to maintain conversation context
-- For within-project context transfer, use handoffs (beads) instead of messages
-- Report mail server errors clearly — never silently skip messaging
+- Check health before operations
+- Use `thread_id` to group related messages
+- Within-project context transfer: use handoffs, not messages
+- Never silently skip on errors

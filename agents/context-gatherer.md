@@ -9,6 +9,7 @@ tools:
   - Glob
   - ToolSearch
 maxTurns: 10
+mcpServers: []
 ---
 
 # Context Gatherer & Handoff Agent

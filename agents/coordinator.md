@@ -9,6 +9,8 @@ tools:
   - Glob
   - ToolSearch
 maxTurns: 15
+mcpServers:
+  - agent-mail
 ---
 
 # Agent Coordinator

@@ -1,28 +1,23 @@
 ---
 name: pickup
-description: "Resume work from a handoff — lists pending handoffs or restores full context from a specific one."
+description: "Resume work from a handoff — lists pending handoffs or restores full context. Trigger phrases — 'pick up where I left off', 'resume work', 'what's waiting', 'continue from handoff', 'check pending handoffs'."
 metadata: {"openclaw":{"emoji":"📥","requires":{"bins":["bd"]}}}
 allowed-tools: "Bash(relay:*)"
 ---
 
 # Relay Pickup
 
-Resume from a handoff via the `relay` CLI.
+Resume from a handoff via CLI (primary method for openclaw/Telegram context).
 
-## List Pending Handoffs
-
-```bash
-relay pickup --list [--project SLUG]
-```
-
-## Pick Up a Specific Handoff
+## Usage
 
 ```bash
-relay pickup ISSUE_ID [--project SLUG]
+relay pickup --list [--project SLUG]     # list pending
+relay pickup ISSUE_ID [--project SLUG]   # restore specific
 ```
 
-The CLI reads the handoff, marks it as `in_progress`, and returns the full context.
+The CLI reads the handoff, marks it `in_progress`, and returns full context.
 
-Present the restored context to the user: objective, branch, decisions, next steps, notes.
+## After pickup
 
-If on a different branch than the handoff, inform the user.
+Present: objective, branch, decisions, next steps, notes. Warn if current branch differs from handoff branch.

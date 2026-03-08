@@ -1,50 +1,31 @@
 ---
 name: relay
-description: "Cross-project issue routing. Create issues in the right tracker (GitHub, GitLab, Jira, Beads) based on per-project .claude/relay.yaml config."
+description: "Cross-project issue routing — create issues, check status, manage trackers. Routes to GitHub, GitLab, Jira, or Beads based on .claude/relay.yaml config. Trigger phrases — 'file a bug', 'create issue', 'log a task', 'show issues', 'project status', 'configure trackers'. PROACTIVE — trigger when you discover bugs or needed fixes in any project."
 metadata: {"openclaw":{"emoji":"🔀","requires":{"anyBins":["gh","bd"]}}}
 allowed-tools: "Read,Bash(relay:*),ToolSearch,Bash(which:*)"
 ---
 
 # Relay — Issue Router
 
-Route issues to the correct tracker via the `relay` CLI.
+Route issues to the correct tracker via CLI.
 
-## Creating an Issue
+## Create issue
 
 ```bash
 relay issue "TITLE" --type TYPE --priority PRIORITY --body "BODY" [--labels L1 L2] [--tracker NAME] [--project SLUG] [--source human|agent] [--no-beads]
 ```
 
-The CLI handles config reading, routing rules, adapter dispatch (gh/bd directly), and beads cross-referencing.
+## MCP dispatch
 
-## Handling MCP Results
+If CLI returns `"status": "needs_mcp"`, load the tool via ToolSearch and call it with provided `params`.
 
-If CLI returns `"status": "needs_mcp"`, the target tracker requires an MCP tool:
-1. Use ToolSearch to load the tool from the response's `tool` field
-2. Call the MCP tool with the provided `params`
-3. Report the result
-
-## Dry-Run Routing
+## Other commands
 
 ```bash
-relay route "TITLE" --type bug --priority high [--source agent]
-```
-
-Shows which tracker would be chosen without creating anything.
-
-## Tracker Management
-
-```bash
-relay trackers                    # Show config
-relay trackers init               # Auto-detect and create config
-relay trackers add --type github --repo org/repo
-relay trackers remove --name beads
-```
-
-## Status Dashboard
-
-```bash
-relay status                      # Current project
-relay status --all                # All atlas projects
-relay status --tracker github     # Specific tracker only
+relay route "TITLE" --type bug --priority high   # dry-run routing
+relay trackers                                    # show config
+relay trackers init                               # auto-detect and create config
+relay trackers add --type github --repo org/repo  # add tracker
+relay trackers remove --name beads                # remove tracker
+relay status [--all] [--tracker NAME]             # issue dashboard
 ```

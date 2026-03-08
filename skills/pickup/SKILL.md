@@ -1,40 +1,32 @@
 ---
 name: pickup
-description: Resume work from a handoff — lists pending handoffs or restores full context from a specific one. Use when picking up handed-off work, resuming after a break, or checking what's waiting.
+description: Resume work from a handoff — lists pending handoffs or restores full context from a specific one. Trigger phrases — "pick up where I left off", "resume work", "what's waiting for me", "continue from handoff", "check pending handoffs", "what was I working on".
 argument-hint: "[<issue_id>] [--list]"
 allowed-tools: "ToolSearch,Bash(relay:*)"
 ---
 
 # Relay Pickup
 
-Resume from a handoff.
+Resume from a handoff. Uses MCP tool as primary method.
 
 ## Primary: MCP tool
 
-Call the `pickup` MCP tool directly:
+Load via ToolSearch (`search for "pickup"`) if not available, then call:
 
 ```
-pickup(
-  issue_id="BEADS-123",  # optional: specific handoff to pick up
-  list=false,            # true to list pending handoffs
-  project="SLUG"         # optional: atlas project slug
-)
+pickup(issue_id="BEADS-123", list=false, project="SLUG")
 ```
 
-Load it via ToolSearch if not already available: search for `pickup`.
+- Omit `issue_id` and set `list=true` to list pending handoffs.
+- Provide `issue_id` to restore a specific handoff's context.
 
 ## Fallback: CLI
 
-List pending handoffs:
 ```bash
 relay pickup --list [--project SLUG]
-```
-
-Pick up a specific handoff:
-```bash
 relay pickup ISSUE_ID [--project SLUG]
 ```
 
-Present the restored context to the user: objective, branch info, decisions, next steps, and any notes.
+## After pickup
 
-If on a different branch than the handoff, inform the user.
+Present: objective, branch info, decisions, next steps, notes. If current branch differs from the handoff branch, warn the user.
