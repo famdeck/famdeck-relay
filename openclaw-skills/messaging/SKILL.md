@@ -2,6 +2,7 @@
 name: messaging
 description: "Send cross-project messages and check inbox via Agent Mail — coordinate between agents, send notifications, and read messages. Use when an agent needs to notify another project, check for incoming messages, or acknowledge messages. Do NOT use for within-project context transfer (use handoff) or issue tracking (use relay)."
 metadata: {"openclaw":{"emoji":"💬"}}
+allowed-tools: "Bash,ToolSearch,mcp__agent-mail__send_message,mcp__agent-mail__fetch_inbox,mcp__agent-mail__acknowledge_message,mcp__agent-mail__ensure_project,mcp__agent-mail__register_agent,mcp__agent-mail__macro_start_session,mcp__agent-mail__fetch_topic,mcp__agent-mail__list_contacts,mcp__agent-mail__search_messages"
 ---
 
 # Relay Messaging
